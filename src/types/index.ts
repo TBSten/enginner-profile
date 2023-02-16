@@ -1,5 +1,15 @@
 import { z } from "zod"
 
+export const ThemeTypeSchema = z.union([
+    z.literal("bad"),           // ダサい
+    z.literal("fashionable"),   // おしゃれ
+    z.literal("json"),          // json
+])
+export const ThemeColorSchema = z.union([
+    z.literal("red"),
+    z.literal("blue"),
+])
+
 export const SkillSchema = z.object({
     name: z.string(),
     comment: z.string(),
@@ -23,24 +33,20 @@ export const ProfItemSchema = z.object({
 })
 export type ProfItem = z.infer<typeof ProfItemSchema>
 
-export const ProfScheme = z.object({
+export const ProfSchema = z.object({
+    profId: z.string(),
     name: z.string(),
     icon: z.string(),
     freeSpace: z.string(),
     skills: z.array(SkillSchema),
     profItems: z.array(ProfItemSchema),
-    publish: z.boolean(),
     theme: z.object({
-        type: z.union([
-            z.literal("bad"),           // ダサい
-            z.literal("fashionable"),   // おしゃれ
-            z.literal("json"),          // json
-        ]),
-        color: z.string(),
+        type: ThemeTypeSchema,
+        color: ThemeColorSchema,
     }),
-    createAt: z.date(),
-    updateAt: z.date(),
-    publishAt: z.date(),
+    createAt: z.number(),
+    updateAt: z.number(),
+    publishAt: z.number().nullable(),
 })
-export type Prof = z.infer<typeof ProfScheme>
+export type Prof = z.infer<typeof ProfSchema>
 

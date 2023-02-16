@@ -1,7 +1,10 @@
 import { Prof } from "@/types";
 import { v4 as uuidv4 } from "uuid";
+import { db } from "./firestore";
 
-export const addNewProf = (name: string): Prof => {
+const profs = db.collection("profs")
+
+export const addNewProf = async (name: string): Promise<Prof> => {
     const profId = uuidv4()
     const prof: Prof = {
         profId,
@@ -18,6 +21,6 @@ export const addNewProf = (name: string): Prof => {
         },
         publishAt: null,
     }
-    console.log("::TODO add prof", prof)
+    await profs.doc(profId).set(prof)
     return prof
 }

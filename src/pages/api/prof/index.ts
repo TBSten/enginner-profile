@@ -7,7 +7,7 @@ const handler: NextApiHandler = async (req, res) => {
         // new Prof
         const body = JSON.parse(req.body)
         const name = z.string().parse(body?.name)
-        const newProf = await addNewProf(name)
+        const newProf = await addNewProf({ name })
         return res.json(newProf)
     }
     res.status(405).json({ "msg": `invalid method ${req.method}` })

@@ -2,6 +2,7 @@ import { ProfSchema } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Container, InputBase, Stack } from '@mui/material';
 import { NextPage } from 'next';
+import { useRouter } from "next/router";
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -12,17 +13,17 @@ const FormSchema = z.object({
 interface Props {
 }
 const NewProfPage: NextPage<Props> = ({ }) => {
-    const { register, handleSubmit, formState: { errors, isValid } } = useForm<z.infer<typeof FormSchema>>({
+    const { register, handleSubmit, formState: { errors, isValid, isSubmitting } } = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema)
     })
+    const router = useRouter()
     const onNewProf = handleSubmit(async (data) => {
-        console.log(data)
         const res = await fetch(`/api/prof/`, {
             method: "POST",
             body: JSON.stringify(data),
         }).then(r => r.json())
         const newProf = ProfSchema.parse(res)
-        console.log("newProf", newProf)
+        router.push(`/prof/${newProf.profId}`)
     })
     return (
         <>
@@ -47,7 +48,7 @@ const NewProfPage: NextPage<Props> = ({ }) => {
                     </Container>
                     <Box width="1px" height="5rem" />
                     <Container maxWidth="sm">
-                        <Button variant='contained' fullWidth type="submit" disabled={!isValid}>
+                        <Button variant='contained' fullWidth type="submit" disabled={!isValid || isSubmitting}>
                             プロフを作成する
                         </Button>
                     </Container>

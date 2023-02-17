@@ -1,14 +1,14 @@
-import { Box, Container } from "@mui/material";
+import { Box, BoxProps, Container } from "@mui/material";
 import { FC, ReactNode } from "react";
 
-interface LayoutContentProps {
+interface LayoutContentProps extends BoxProps {
     children: ReactNode
     bgcolor?: string
 }
-const LayoutContent: FC<LayoutContentProps> = ({ children, bgcolor }) => {
+const LayoutContent: FC<LayoutContentProps> = ({ children, bgcolor, sx, ...boxProps }) => {
     if (!bgcolor) bgcolor = undefined
     return (
-        <Box component="section" bgcolor={bgcolor} p={2} sx={{ overflowX: "auto" }}>
+        <Box component="section" bgcolor={bgcolor} p={2} sx={{ overflowX: "auto", ...sx }} {...boxProps}>
             <Container>
                 {children}
             </Container>

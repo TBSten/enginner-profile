@@ -5,18 +5,23 @@ export const ThemeTypeSchema = z.union([
     z.literal("fashionable"),   // おしゃれ
     z.literal("json"),          // json
 ])
+export type ThemeType = z.infer<typeof ThemeTypeSchema>
 export const ThemeColorSchema = z.union([
     z.literal("red"),
     z.literal("blue"),
 ])
+export type ThemeColor = z.infer<typeof ThemeColorSchema>
+export const AssessmentSchema = z.object({
+    value: z.number(),
+    comment: z.string(),
+})
+export type Assessment = z.infer<typeof AssessmentSchema>
+
 
 export const SkillSchema = z.object({
     name: z.string(),
     comment: z.string(),
-    assessment: z.object({
-        value: z.number(),
-        comment: z.string(),
-    }),
+    assessment: AssessmentSchema,
     appeal: z.boolean(),
 })
 export type Skill = z.infer<typeof SkillSchema>
@@ -44,6 +49,7 @@ export const ProfSchema = z.object({
         type: ThemeTypeSchema,
         color: ThemeColorSchema,
     }),
+    publish: z.boolean(),
     createAt: z.number(),
     updateAt: z.number(),
     publishAt: z.number().nullable(),

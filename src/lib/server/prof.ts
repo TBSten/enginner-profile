@@ -13,6 +13,7 @@ export const addNewProf = async (input: Partial<Prof>): Promise<Prof> => {
         icon: "",
         skills: [],
         profItems: [],
+        publish: false,
         createAt: new Date().valueOf(),
         updateAt: new Date().valueOf(),
         theme: {
@@ -31,5 +32,9 @@ export const getProf = async (profId: string): Promise<Prof | null> => {
     if (!snapshot.exists) return null
     const prof = ProfSchema.parse(snapshot.data())
     return prof
+}
+
+export const updateProf = async (profId: string, input: Partial<Prof>): Promise<void> => {
+    await profs.doc(profId).set(input, { merge: true })
 }
 

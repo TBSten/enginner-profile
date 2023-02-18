@@ -1,18 +1,16 @@
 
 import { colors } from "@/styles/color";
 import { Box, Menu, MenuItem, Stack, useTheme } from "@mui/material";
-import { FC, useRef } from "react";
+import { FC, useCallback, useRef, useState } from "react";
 
 interface ColorPickerProps {
     size?: string
-    open: boolean
-    onOpen: () => void
-    onClose: () => void
     color: string
     onChange: (color: string) => void
     label?: string
 }
-const ColorPicker: FC<ColorPickerProps> = ({ color, onChange, open, onOpen, onClose, size = "2.5rem", label = "テーマカラーを選択" }) => {
+const ColorPicker: FC<ColorPickerProps> = ({ color, onChange, size = "2.5rem", label = "テーマカラーを選択" }) => {
+    const { props: { open, onOpen, onClose } } = useColorPicker()
     const boxRef = useRef<HTMLElement>(null)
     const theme = useTheme()
     const handleSelect = (color: string) => () => {
@@ -44,7 +42,7 @@ const ColorPicker: FC<ColorPickerProps> = ({ color, onChange, open, onOpen, onCl
                     {label}
                 </Box>
             </Stack>
-            <Menu open={open} onClose={onClose} anchorEl={boxRef.current} anchorOrigin={{ horizontal: "right", vertical: "center" }}>
+            <Menu open={open} onClose={onClose} anchorEl={boxRef.current} anchorOrigin={{ horizontal: "right", vertical: "center" }} sx={{ maxHeight: "80vh" }}>
                 {colors.map(([name, color]) =>
                     <MenuItem key={color} onClick={handleSelect(color)}>
                         <Box
@@ -71,3 +69,22 @@ const ColorPicker: FC<ColorPickerProps> = ({ color, onChange, open, onOpen, onCl
 }
 
 export default ColorPicker;
+
+export function useColorPicker() {
+    const [open, setOpen] = useState(false);
+    const onOpen = useCallback(() => setOpen(true), [])
+    const onClose = useCallback(() => setOpen(false), [])
+    const show = onOpen
+    const hide = onClose
+    const props = {
+        open,
+        onOpen,
+        onClose,
+    } as const
+    return {
+        open,
+        show,
+        hide,
+        props,
+    }
+}

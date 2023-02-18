@@ -1,11 +1,13 @@
+import Center from '@/components/Center';
 import ColorPicker from '@/components/ColorPicker';
+import ThemeTypePicker from '@/components/ThemeTypePicker';
 import BaseLayout from '@/components/layout/BaseLayout';
 import LayoutContent from '@/components/layout/LayoutContent';
 import { chooseFile } from '@/lib/client/file';
 import { useLoading } from '@/lib/client/loading';
 import { getLocal, saveLocal } from '@/lib/client/saveLocal';
 import { getProf } from '@/lib/server/prof';
-import { Assessment, Prof, ProfItem, ProfItemValue, ProfSchema, Skill } from '@/types';
+import { Assessment, Prof, ProfItem, ProfItemValue, ProfSchema, Skill, ThemeType } from '@/types';
 import { Add, Delete, MoreVert } from '@mui/icons-material';
 import { Alert, Box, Button, CircularProgress, Container, Divider, Grid, IconButton, InputBase, Menu, MenuItem, Select, SelectProps, Stack, Switch, useTheme } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
@@ -33,8 +35,12 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
         const saveData = getLocal(LOCAL_PROF_KEY)
         if (saveData === null) { return }
         const savedProf = ProfSchema.parse(saveData)
-        setProf(savedProf)
-    }, [])
+        if (savedProf.profId === defaultProf.profId) {
+            setProf(savedProf)
+        } else {
+            // 保存されたものを編集できない
+        }
+    }, [defaultProf.profId])
 
     const handleChangeName =
         useCallback((name: string) => setProf(p => ({ ...p, name })), [])
@@ -44,6 +50,8 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
         useCallback((icon: string) => setProf(p => ({ ...p, icon })), [])
     const handleChangeColor =
         useCallback((color: string) => setProf(p => ({ ...p, theme: { ...p.theme, color } })), [])
+    const handleChangeThemeType =
+        useCallback((type: ThemeType) => setProf(p => ({ ...p, theme: { ...p.theme, type } })), [])
     const handleChangeSkills: SkillsSectionProps["onChangeSkills"] =
         useCallback(updater => setProf(p => ({ ...p, skills: updater(p.skills) })), [])
     const handleChangeProfItems: ProfItemsSectionProps["onChangeProfItems"] =
@@ -64,9 +72,11 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
                     onChangeIcon={handleChangeIcon}
                 />
                 <Divider />
-                <ColorSelectSection
+                <ThemeEditSection
+                    themeType={prof.theme.type}
+                    onChangeThemeType={handleChangeThemeType}
                     color={prof.theme.color}
-                    onChange={handleChangeColor}
+                    onChangeColor={handleChangeColor}
                 />
                 <SillsSection
                     skills={prof.skills}
@@ -192,25 +202,33 @@ const OverviewSection: FC<OverviewProps> = ({ name, freeSpace, icon, onChangeNam
     );
 }
 
-interface ColorSelectSectionProps {
+interface ThemeEditProps {
+    themeType: ThemeType
     color: string
-    onChange: (color: string) => void
+    onChangeThemeType: (type: ThemeType) => void
+    onChangeColor: (color: string) => void
 }
-const ColorSelectSection: FC<ColorSelectSectionProps> = React.memo(function ColorSelectSection({
-    color, onChange,
+const ThemeEditSection: FC<ThemeEditProps> = React.memo(function ThemeEditSection({
+    color, onChangeColor,
+    themeType, onChangeThemeType,
 }) {
-    // const [color, setColor] = useState<string>(defaultColor[1])
-    const [openColorPicker, setOpenColorPicker] = useState(false);
     return (
         <LayoutContent>
-            <Stack direction="column" justifyContent="center" alignItems="center">
-                <ColorPicker
-                    color={color}
-                    onChange={(color) => onChange(color)}
-                    open={openColorPicker}
-                    onOpen={() => setOpenColorPicker(true)}
-                    onClose={() => setOpenColorPicker(false)} />
-            </Stack>
+            <Center flexDirection={{ xs: "column", md: "row" }} justifyContent="space-around" p={1}>
+                <Box p={{ xs: 1, md: 0 }}>
+                    <ThemeTypePicker
+                        type={themeType}
+                        onChange={(type) => onChangeThemeType(type)}
+                    />
+                </Box>
+                <Divider flexItem />
+                <Box p={{ xs: 1, md: 0 }}>
+                    <ColorPicker
+                        color={color}
+                        onChange={(color) => onChangeColor(color)}
+                    />
+                </Box>
+            </Center>
         </LayoutContent>
     );
 })
@@ -229,7 +247,6 @@ interface SkillsSectionProps {
     onChangeSkills: (updater: ((p: Skill[]) => Skill[])) => void
 }
 const SillsSection: FC<SkillsSectionProps> = React.memo(function SillsSection({ skills, onChangeSkills }) {
-    console.log("skills render")
     const handleChangeName = (idx: number) => (newName: string) => {
         onChangeSkills(p => {
             const newSkills = [...p];

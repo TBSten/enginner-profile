@@ -3,16 +3,13 @@ import { FC } from "react";
 
 interface CenterProps extends BoxProps {
 }
-const Center: FC<CenterProps> = ({ sx, ...boxProps }) => {
+const Center: FC<CenterProps> = ({ ...boxProps }) => {
     return (
         <Box
-            sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                ...sx,
-            }}
+            display="flex"
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
             {...boxProps}
         />
     );

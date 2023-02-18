@@ -8,7 +8,7 @@ export const themeTypes = [
 export const ThemeTypeSchema = z.union([
     z.literal("bad"),
     z.literal("fashionable"),
-    z.literal("json"),
+    z.literal("files"),
 ])
 export type ThemeType = z.infer<typeof ThemeTypeSchema>
 export const AssessmentSchema = z.object({

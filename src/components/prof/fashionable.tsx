@@ -180,7 +180,7 @@ const ProfItems: FC<ProfItemsProps> = ({ prof }) => {
             p={1}
             display="flex"
             flexDirection="row"
-            flexWrap="nowrap"
+            flexWrap="wrap"
             justifyContent="center"
         >
             {items.map(item =>
@@ -217,6 +217,7 @@ const ProfItemView: FC<ProfItemViewProps> = ({ profItem, theme }) => {
             flexGrow: 0,
             flexShrink: 0,
             cursor: "pointer",
+            margin: "0.3rem",
         }}>{content}</Box>
     )
 }

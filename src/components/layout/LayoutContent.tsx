@@ -8,7 +8,7 @@ interface LayoutContentProps extends BoxProps {
 const LayoutContent: FC<LayoutContentProps> = ({ children, bgcolor, sx, ...boxProps }) => {
     if (!bgcolor) bgcolor = undefined
     return (
-        <Box component="section" bgcolor={bgcolor} p={2} sx={{ overflowX: "auto", ...sx }} {...boxProps}>
+        <Box component="section" bgcolor={bgcolor} p={{ xs: 1, md: 2 }} sx={{ overflowX: "auto", ...sx }} {...boxProps}>
             <Container>
                 {children}
             </Container>

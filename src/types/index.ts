@@ -1,9 +1,14 @@
 import { z } from "zod"
 
+export const themeTypes = [
+    "bad",          // ダサい
+    "fashionable",  // おしゃれ
+    "files",        // json,csvなどのファイル
+] as const
 export const ThemeTypeSchema = z.union([
-    z.literal("bad"),           // ダサい
-    z.literal("fashionable"),   // おしゃれ
-    z.literal("json"),          // json
+    z.literal("bad"),
+    z.literal("fashionable"),
+    z.literal("json"),
 ])
 export type ThemeType = z.infer<typeof ThemeTypeSchema>
 export const AssessmentSchema = z.object({
@@ -21,13 +26,20 @@ export const SkillSchema = z.object({
 })
 export type Skill = z.infer<typeof SkillSchema>
 
+export const ProfItemValueSchema = z.union([
+    z.object({
+        type: z.literal("text"),
+        text: z.string(),
+    }),
+    z.object({
+        type: z.literal("link"),
+        link: z.string(),
+    }),
+])
+export type ProfItemValue = z.infer<typeof ProfItemValueSchema>
 export const ProfItemSchema = z.object({
     name: z.string(),
-    value: z.union([
-        z.number(),
-        z.string(),
-        z.boolean(),
-    ]),
+    value: ProfItemValueSchema,
     comment: z.string(),
     appeal: z.boolean(),
 })

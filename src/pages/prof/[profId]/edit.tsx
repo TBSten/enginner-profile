@@ -5,7 +5,7 @@ import { chooseFile } from '@/lib/client/file';
 import { useLoading } from '@/lib/client/loading';
 import { getLocal, saveLocal } from '@/lib/client/saveLocal';
 import { getProf } from '@/lib/server/prof';
-import { Assessment, Prof, ProfItem, ProfSchema, Skill } from '@/types';
+import { Assessment, Prof, ProfItem, ProfItemValue, ProfSchema, Skill } from '@/types';
 import { Add, Delete, MoreVert } from '@mui/icons-material';
 import { Alert, Box, Button, CircularProgress, Container, Divider, Grid, IconButton, InputBase, Menu, MenuItem, Select, SelectProps, Stack, Switch, useTheme } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
@@ -399,7 +399,10 @@ const EditableSkill: FC<EditableSkillProps> = React.memo(function EditableSkill(
 
 const defaultProfItem = (): ProfItem => ({
     name: "趣味",
-    value: "ギター",
+    value: {
+        type: "text",
+        text: "ギター",
+    },
     comment: "",
     appeal: false,
 })
@@ -517,11 +520,11 @@ const EditableProfItem: FC<EditableProfItemProps> = React.memo(function Editable
                     sx={{ fontWeight: "bold" }} />
             </Grid>
             <Grid item xs={12} sm px={1}>
-                <InputBase
+                <ProfItemValueEdit
+                    name={profItem.name}
                     value={profItem.value}
-                    onChange={e => onChangeValue(e.target.value)}
-                    placeholder='項目値を入力'
-                    fullWidth />
+                    onChange={value => onChangeValue(value)}
+                />
             </Grid>
             <Grid item xs={12} sm px={1}>
                 <InputBase
@@ -556,6 +559,59 @@ const EditableProfItem: FC<EditableProfItemProps> = React.memo(function Editable
     );
 })
 
+interface ProfItemValueEditProps {
+    name: ProfItem["name"]
+    value: ProfItemValue
+    onChange: (value: ProfItemValue) => void
+}
+const ProfItemValueEdit: FC<ProfItemValueEditProps> = ({ name, value, onChange }) => {
+    const [openMenu, setOpenMenu] = useState(false)
+    const btnRef = useRef<HTMLButtonElement>(null)
+    return (
+        <Box display="flex">
+            <Box sx={{ flexGrow: 1 }}>
+                {value.type === "text" &&
+                    <InputBase
+                        value={value.text}
+                        onChange={e => onChange({ type: "text", text: e.target.value })}
+                        placeholder={name + "を入力"}
+                        fullWidth
+                    />
+                }
+                {value.type === "link" &&
+                    <InputBase
+                        value={value.link}
+                        onChange={e => onChange({ type: "link", link: e.target.value })}
+                        placeholder={name + 'のリンクを入力'}
+                        fullWidth
+                    />
+                }
+            </Box>
+            <IconButton ref={btnRef} color="secondary" onClick={() => setOpenMenu(true)}>
+                <MoreVert />
+            </IconButton>
+            <Menu open={openMenu} onClose={() => setOpenMenu(false)} anchorEl={btnRef.current}>
+                <MenuItem disabled>
+                    タイプ
+                </MenuItem>
+                <Divider />
+                <MenuItem
+                    onClick={() => onChange({ type: "text", text: "" })}
+                    disabled={value.type === "text"}
+                >
+                    テキスト
+                </MenuItem>
+                <MenuItem
+                    onClick={() => onChange({ type: "link", link: "https://github.com/hogehoge" })}
+                    disabled={value.type === "link"}
+                >
+                    リンク
+                </MenuItem>
+            </Menu>
+        </Box>
+    );
+}
+
 interface OutputSectionProps {
     profId: string
     publish: boolean
@@ -574,10 +630,10 @@ const OutputSection: FC<OutputSectionProps> = React.memo(function OutputSection(
             <Container maxWidth="sm">
 
                 <Stack direction={{ xs: "column", md: "row" }} p={4} width="100%" justifyContent="space-between" spacing={2}>
-                    <Button variant='contained' sx={{ px: 2, py: 3, borderRadius: "9999px" }} size='large' href={`/prof/${profId}`}>
+                    <Button variant='contained' sx={{ px: 2, py: 3, borderRadius: "9999px", textAlign: "center" }} size='large' href={`/prof/${profId}`}>
                         自己紹介ページを表示
                     </Button>
-                    <Button variant='contained' sx={{ px: 2, py: 3, borderRadius: "9999px" }} size='large' href={`/prof/${profId}/card`}>
+                    <Button variant='contained' sx={{ px: 2, py: 3, borderRadius: "9999px", textAlign: "center" }} size='large' href={`/prof/${profId}/card`}>
                         カード形式で表示
                     </Button>
                 </Stack>

@@ -6,11 +6,6 @@ export const ThemeTypeSchema = z.union([
     z.literal("json"),          // json
 ])
 export type ThemeType = z.infer<typeof ThemeTypeSchema>
-export const ThemeColorSchema = z.union([
-    z.literal("red"),
-    z.literal("blue"),
-])
-export type ThemeColor = z.infer<typeof ThemeColorSchema>
 export const AssessmentSchema = z.object({
     value: z.number(),
     comment: z.string(),
@@ -47,7 +42,7 @@ export const ProfSchema = z.object({
     profItems: z.array(ProfItemSchema),
     theme: z.object({
         type: ThemeTypeSchema,
-        color: ThemeColorSchema,
+        color: z.string(),
     }),
     publish: z.boolean(),
     createAt: z.number(),

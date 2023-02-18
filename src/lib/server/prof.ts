@@ -1,3 +1,4 @@
+import { defaultColor } from "@/styles/color";
 import { Prof, ProfSchema } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "./firestore";
@@ -14,11 +15,11 @@ export const addNewProf = async (input: Partial<Prof>): Promise<Prof> => {
         skills: [],
         profItems: [],
         publish: false,
-        createAt: new Date().valueOf(),
-        updateAt: new Date().valueOf(),
+        createAt: Date.now(),
+        updateAt: Date.now(),
         theme: {
             type: "fashionable",
-            color: "red",
+            color: defaultColor[1],
         },
         publishAt: null,
         ...input,
@@ -35,6 +36,13 @@ export const getProf = async (profId: string): Promise<Prof | null> => {
 }
 
 export const updateProf = async (profId: string, input: Partial<Prof>): Promise<void> => {
-    await profs.doc(profId).set(input, { merge: true })
+    const prof: Partial<Prof> = {
+        ...input,
+        updateAt: Date.now(),
+    }
+    if (prof.publish) {
+        prof.publishAt = Date.now()
+    }
+    await profs.doc(profId).set(prof, { merge: true })
 }
 

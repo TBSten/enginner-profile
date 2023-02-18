@@ -1,7 +1,7 @@
-import { Firestore } from "@google-cloud/firestore"
+import { Storage } from "@google-cloud/storage"
 import { credentials, gcpProjectId } from "./gcp"
 
-export const db = new Firestore({
+export const storage = new Storage({
     projectId: gcpProjectId,
     credentials,
 })

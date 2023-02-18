@@ -23,7 +23,7 @@ const NewProfPage: NextPage<Props> = ({ }) => {
             body: JSON.stringify(data),
         }).then(r => r.json())
         const newProf = ProfSchema.parse(res)
-        router.push(`/prof/${newProf.profId}`)
+        router.push(`/prof/${newProf.profId}/edit`)
     })
     return (
         <>

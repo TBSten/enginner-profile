@@ -5,11 +5,12 @@ import BaseLayout from '@/components/layout/BaseLayout';
 import LayoutContent from '@/components/layout/LayoutContent';
 import { chooseFile } from '@/lib/client/file';
 import { useLoading } from '@/lib/client/loading';
+import { useResponsive } from '@/lib/client/responsive';
 import { getLocal, saveLocal } from '@/lib/client/saveLocal';
 import { getProf } from '@/lib/server/prof';
 import { Assessment, Prof, ProfItem, ProfItemValue, ProfSchema, Skill, ThemeType } from '@/types';
-import { Add, Delete, MoreVert } from '@mui/icons-material';
-import { Alert, Box, Button, CircularProgress, Container, Divider, Grid, IconButton, InputBase, Menu, MenuItem, Select, SelectProps, Stack, Switch, useTheme } from '@mui/material';
+import { Add, Delete, KeyboardDoubleArrowDown, KeyboardDoubleArrowUp, MoreVert } from '@mui/icons-material';
+import { Alert, Box, Button, CircularProgress, Container, Divider, Grid, IconButton, InputBase, ListItemIcon, Menu, MenuItem, Select, SelectProps, Stack, Switch, useTheme } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -362,7 +363,7 @@ const EditableSkill: FC<EditableSkillProps> = React.memo(function EditableSkill(
     };
     return (
         <Grid container width="100%" p={1} sx={t => ({ bgcolor: t.palette.background.paper })}>
-            <Grid item xs="auto" px={1}>
+            <Grid item xs="auto" px={1} color={t => t.palette.primary.main}>
                 {/* TODO SKILL ICON */}
                 #
             </Grid>
@@ -371,7 +372,9 @@ const EditableSkill: FC<EditableSkillProps> = React.memo(function EditableSkill(
                     value={skill.name}
                     onChange={e => onChangeName(e.target.value)}
                     fullWidth
-                    placeholder='スキル名を入力' />
+                    placeholder='スキル名を入力'
+                    sx={{ fontWeight: "bold" }}
+                />
             </Grid>
             <Grid item xs={12} sm px={1}>
                 <Select
@@ -471,6 +474,28 @@ const ProfItemsSection: FC<ProfItemsSectionProps> = React.memo(function ProfItem
             return newProfItems;
         });
     };
+    const handleMoveToUp = (idx: number) => () => {
+        onChangeProfItems(p => {
+            // idxを一つ上へ
+            if (idx === 0) return p
+            const newProfItems = [...p]
+            const work = newProfItems[idx]
+            newProfItems[idx] = newProfItems[idx - 1]
+            newProfItems[idx - 1] = work
+            return newProfItems
+        })
+    }
+    const handleMoveToDown = (idx: number) => () => {
+        onChangeProfItems(p => {
+            // idxを一つ下へ
+            if (idx === p.length - 1) return p
+            const newProfItems = [...p]
+            const work = newProfItems[idx]
+            newProfItems[idx] = newProfItems[idx + 1]
+            newProfItems[idx + 1] = work
+            return newProfItems
+        })
+    }
     const handleDeleteProfItem = (idx: number) => () => {
         onChangeProfItems(p => p.filter((_, i) => idx !== i));
     };
@@ -491,6 +516,8 @@ const ProfItemsSection: FC<ProfItemsSectionProps> = React.memo(function ProfItem
                     onChangeValue={handleChangeProfItemValue(idx)}
                     onChangeComment={handleChangeProfItemComment(idx)}
                     onChangeAppeal={handleChangeProfItemAppeal(idx)}
+                    onMoveToUp={handleMoveToUp(idx)}
+                    onMoveToDown={handleMoveToDown(idx)}
                     onDelete={handleDeleteProfItem(idx)} />
             </Box>
             )}
@@ -517,17 +544,41 @@ interface EditableProfItemProps {
     onChangeValue: (value: ProfItem["value"]) => void
     onChangeComment: (value: string) => void
     onChangeAppeal: (value: boolean) => void
+    onMoveToUp: () => void
+    onMoveToDown: () => void
     onDelete: () => void
 }
-const EditableProfItem: FC<EditableProfItemProps> = React.memo(function EditableProfItem({ profItem, onChangeName, onChangeValue, onChangeComment, onChangeAppeal, onDelete, }) {
+const EditableProfItem: FC<EditableProfItemProps> = React.memo(function EditableProfItem({
+    profItem,
+    onChangeName,
+    onChangeValue,
+    onChangeComment,
+    onChangeAppeal,
+    onDelete,
+    onMoveToUp,
+    onMoveToDown,
+}) {
     const [openMenu, setOpenMenu] = useState(false);
     const btnRef = useRef<HTMLButtonElement>(null);
+    const { isPc, responsive } = useResponsive()
+    const handleMoveToUp = () => {
+        setOpenMenu(false)
+        onMoveToUp()
+    }
+    const handleMoveToDown = () => {
+        setOpenMenu(false)
+        onMoveToDown()
+    }
     const handleDelete = () => {
-        setOpenMenu(false);
-        onDelete();
+        setOpenMenu(false)
+        onDelete()
     };
     return (
         <Grid container p={1} sx={t => ({ bgcolor: t.palette.background.paper })}>
+            <Grid item xs="auto" px={1} color={t => t.palette.secondary.main}>
+                {/* TODO SKILL ICON */}
+                #
+            </Grid>
             <Grid item xs="auto" sm="auto" px={1}>
                 <InputBase
                     value={profItem.name}
@@ -548,7 +599,9 @@ const EditableProfItem: FC<EditableProfItemProps> = React.memo(function Editable
                     value={profItem.comment}
                     onChange={e => onChangeComment(e.target.value)}
                     placeholder='コメントを入力'
-                    fullWidth />
+                    fullWidth={isPc}
+                    multiline rows={responsive(2, 1)}
+                />
             </Grid>
             <Grid item xs={8} sm="auto" px={1}>
                 <Stack direction="row" justifyContent={{ xs: "flex-end", md: "start" }} alignItems="center">
@@ -565,8 +618,22 @@ const EditableProfItem: FC<EditableProfItemProps> = React.memo(function Editable
                         <MoreVert />
                     </IconButton>
                     <Menu open={openMenu} onClose={() => setOpenMenu(false)} anchorEl={btnRef.current}>
+                        <MenuItem onClick={handleMoveToUp}>
+                            <ListItemIcon>
+                                <KeyboardDoubleArrowUp />
+                            </ListItemIcon>
+                            一つ上に移動
+                        </MenuItem>
+                        <MenuItem onClick={handleMoveToDown}>
+                            <ListItemIcon>
+                                <KeyboardDoubleArrowDown />
+                            </ListItemIcon>
+                            一つ下に移動
+                        </MenuItem>
                         <MenuItem onClick={handleDelete}>
-                            <Delete />
+                            <ListItemIcon>
+                                <Delete />
+                            </ListItemIcon>
                             削除
                         </MenuItem>
                     </Menu>
@@ -585,7 +652,15 @@ const ProfItemValueEdit: FC<ProfItemValueEditProps> = ({ name, value, onChange }
     const [openMenu, setOpenMenu] = useState(false)
     const btnRef = useRef<HTMLButtonElement>(null)
     return (
-        <Box display="flex">
+        <Box
+            display="flex"
+            alignItems="center"
+            border="solid 1px"
+            borderColor={t => t.palette.secondary.main}
+            borderRadius={t => t.shape.borderRadius}
+            pl={1}
+            py={0.5}
+        >
             <Box sx={{ flexGrow: 1 }}>
                 {value.type === "text" &&
                     <InputBase
@@ -647,10 +722,22 @@ const OutputSection: FC<OutputSectionProps> = React.memo(function OutputSection(
             <Container maxWidth="sm">
 
                 <Stack direction={{ xs: "column", md: "row" }} p={4} width="100%" justifyContent="space-between" spacing={2}>
-                    <Button variant='contained' sx={{ px: 2, py: 3, borderRadius: "9999px", textAlign: "center" }} size='large' href={`/prof/${profId}`}>
+                    <Button
+                        variant='contained'
+                        sx={{ px: 2, py: 3, borderRadius: "9999px", textAlign: "center" }}
+                        size='large'
+                        href={`/prof/${profId}`}
+                        onClick={onSave}
+                    >
                         自己紹介ページを表示
                     </Button>
-                    <Button variant='contained' sx={{ px: 2, py: 3, borderRadius: "9999px", textAlign: "center" }} size='large' href={`/prof/${profId}/card`}>
+                    <Button
+                        variant='contained'
+                        sx={{ px: 2, py: 3, borderRadius: "9999px", textAlign: "center" }}
+                        size='large'
+                        href={`/prof/${profId}/card`}
+                        onClick={onSave}
+                    >
                         カード形式で表示
                     </Button>
                 </Stack>

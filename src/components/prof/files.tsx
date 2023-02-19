@@ -1,3 +1,5 @@
+import { copyToClipboard } from "@/lib/client/copy";
+import { downloadAsTextFile } from "@/lib/client/download";
 import { Prof } from "@/types";
 import { ContentCopy, Download, FiberNew } from "@mui/icons-material";
 import { Box, Button, Paper, Snackbar, Stack, Tab, Tabs } from "@mui/material";
@@ -29,22 +31,12 @@ const FilesProfView: FC<FilesProfViewProps> = ({ prof }) => {
     const viewData = useMemo(() => profToViewData(prof), [prof])
     const viewText = viewDataToViewText(type.name, viewData)
     const copyViewData = async () => {
-        if (!navigator.clipboard) {
-            alert("コピーできませんでした")
-            return
-        }
-        await navigator.clipboard.writeText(viewText)
+        await copyToClipboard(viewText)
         setOpenSnackbar(true)
     }
     const downloadViewText = async () => {
         const fileName = `${prof.name}-prof.${type.name}`
-        const blob = new Blob([viewText], { type: type.contentType })
-        const aEl = document.createElement("a")
-        aEl.href = URL.createObjectURL(blob)
-        aEl.target = "_blank"
-        aEl.download = fileName
-        aEl.click()
-        URL.revokeObjectURL(aEl.href)
+        await downloadAsTextFile(fileName, type.contentType, viewText)
     }
     return (
         <Paper>

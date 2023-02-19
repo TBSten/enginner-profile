@@ -1,5 +1,5 @@
 import { Prof, ProfItem, Skill } from "@/types";
-import { Box, Button, Container, Divider, Grid, Link, Stack, alpha, useTheme } from "@mui/material";
+import { Box, Button, Container, Divider, Grid, Link, Stack, Tooltip, alpha, useTheme } from "@mui/material";
 import Image from "next/image";
 import { FC, useState } from "react";
 import Center from "../Center";
@@ -196,9 +196,14 @@ interface ProfItemViewProps {
 }
 const ProfItemView: FC<ProfItemViewProps> = ({ profItem, theme }) => {
     const muiTheme = useTheme()
+    const [openTooltip, setOpenTooltip] = useState(false)
 
     const content = profItem.value.type === "text"
-        ? <>{profItem.name} : {profItem.value.text}</>
+        ? <Box fontSize="0.8em">
+            {profItem.name}
+            :
+            <Box component="span" fontWeight="bold">{profItem.value.text}</Box>
+        </Box>
         : <Link
             color="inherit"
             underline="hover"
@@ -209,15 +214,29 @@ const ProfItemView: FC<ProfItemViewProps> = ({ profItem, theme }) => {
             {profItem.name}
         </Link>
     return (
-        <Box key={profItem.name} p={0.5} mr={1} sx={{
-            width: "fit-content",
-            borderRadius: "0.5rem",
-            backgroundColor: theme.color,
-            color: muiTheme.palette.getContrastText(theme.color),
-            flexGrow: 0,
-            flexShrink: 0,
-            cursor: "pointer",
-            margin: "0.3rem",
-        }}>{content}</Box>
+        <Tooltip
+            title={profItem.comment}
+            open={openTooltip}
+            onOpen={() => setOpenTooltip(true)}
+            onClose={() => setOpenTooltip(false)}
+            leaveTouchDelay={Number.MAX_VALUE}
+        >
+            <Box
+                key={profItem.name}
+                p={0.5}
+                mr={1}
+                sx={{
+                    width: "fit-content",
+                    borderRadius: "0.5rem",
+                    backgroundColor: theme.color,
+                    color: muiTheme.palette.getContrastText(theme.color),
+                    flexGrow: 0,
+                    flexShrink: 0,
+                    cursor: "pointer",
+                    margin: "0.3rem",
+                }}
+                onClick={() => setOpenTooltip(p => !p)}
+            >{content}</Box>
+        </Tooltip>
     )
 }

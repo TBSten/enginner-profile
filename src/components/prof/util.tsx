@@ -1,5 +1,6 @@
 import { Prof } from "@/types";
 
 export type ProfViewComponentProps = {
-    prof: Prof,
+    prof: Prof
+    createFromProf: () => void
 }

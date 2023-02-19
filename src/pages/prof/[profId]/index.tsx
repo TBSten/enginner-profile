@@ -12,6 +12,9 @@ interface Props {
 }
 const ProfViewPage: NextPage<Props> = ({ prof }) => {
     const ProfViewComponent = themeTypeToComponent(prof.theme.type)
+    const handleCreateFromProf = () => {
+        // profをもとに新しいプロフを新規作成
+    }
     return (
         <>
             <ProfViewHead prof={prof} />
@@ -19,6 +22,7 @@ const ProfViewPage: NextPage<Props> = ({ prof }) => {
                 <LayoutContent>
                     <ProfViewComponent
                         prof={prof}
+                        createFromProf={handleCreateFromProf}
                     />
                 </LayoutContent>
             </BaseLayout>
@@ -33,7 +37,7 @@ interface ProfViewHeadProps {
 const ProfViewHead: FC<ProfViewHeadProps> = ({ prof }) => {
     return (
         <Head>
-            <title>{prof.name}のプロフィール</title>
+            <title>{`${prof.name}のプロフィール`}</title>
         </Head>
     );
 }

@@ -75,8 +75,8 @@ const ThemeTypePicker: FC<ThemeTypePickerProps> = ({
                     </Grid>
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="contained" onClick={handleChangeType}>
-                        決定
+                    <Button variant="text" onClick={handleChangeType}>
+                        閉じる
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -168,7 +168,7 @@ const FileTypeImage: FC<FileTypeImageProps> = () => {
                 ファイル
             </Box>
             <Image
-                src="/theme-type-preview-1.png"
+                src="/theme-type-preview-3.png"
                 alt="ファイルのプレビュー"
                 width={300}
                 height={200}

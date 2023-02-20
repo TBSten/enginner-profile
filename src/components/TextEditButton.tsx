@@ -12,12 +12,13 @@ const TextEditButton: FC<TextEditButtonProps> = ({
     icon = <Edit />,
     label,
     dialogProps,
+    color,
     ...textFieldProps
 }) => {
     const [openDialog, setOpenDialog] = useState(false)
     return (
         <>
-            <Button onClick={() => setOpenDialog(true)} startIcon={icon}>
+            <Button onClick={() => setOpenDialog(true)} startIcon={icon} color={color}>
                 {label}
             </Button>
             <Dialog open={openDialog} onClose={() => setOpenDialog(false)} {...dialogProps} fullWidth>

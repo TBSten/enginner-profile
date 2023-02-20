@@ -11,8 +11,8 @@ import { useResponsive } from '@/lib/client/responsive';
 import { getLocal, saveLocal } from '@/lib/client/saveLocal';
 import { getProf } from '@/lib/server/prof';
 import { Assessment, Prof, ProfItem, ProfItemValue, ProfSchema, Skill, ThemeType } from '@/types';
-import { Add, ContentCopy, Delete, Edit, KeyboardDoubleArrowDown, KeyboardDoubleArrowUp, MoreVert } from '@mui/icons-material';
-import { Alert, Box, Button, CircularProgress, Container, Divider, Grid, IconButton, InputBase, ListItemIcon, Menu, MenuItem, Select, SelectProps, Snackbar, Stack, Switch, Tooltip, useTheme } from '@mui/material';
+import { Add, ContentCopy, Delete, Edit, KeyboardArrowUp, KeyboardDoubleArrowDown, KeyboardDoubleArrowUp, MoreVert } from '@mui/icons-material';
+import { Alert, Box, Button, CircularProgress, Container, Divider, Fab, Grid, IconButton, InputBase, ListItemIcon, Menu, MenuItem, Select, SelectProps, Snackbar, Stack, Switch, Tooltip, useTheme } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -100,6 +100,7 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
                     onChangePublish={handleChangePublich}
                     onSave={handleSaveProf}
                 />
+                <FooterSection />
             </BaseLayout>
         </>
     );
@@ -403,73 +404,88 @@ const EditableSkill: FC<EditableSkillProps> = React.memo(function EditableSkill(
         setOpenMenu(false);
         onDelete();
     };
+    const { responsive } = useResponsive()
     return (
-        <Grid container width="100%" p={1} sx={t => ({ bgcolor: t.palette.background.paper })}>
-            <Grid item xs="auto" px={1} color={t => t.palette.primary.main}>
-                {/* TODO SKILL ICON */}
-                #
-            </Grid>
-            <Grid item xs sm px={1}>
-                <InputBase
-                    value={skill.name}
-                    onChange={e => onChangeName(e.target.value)}
-                    fullWidth
-                    placeholder='スキル名を入力'
-                    sx={{ fontWeight: "bold" }}
-                />
-            </Grid>
-            <Grid item xs={12} sm px={1}>
-                <Select
-                    variant='standard'
-                    value={skill.assessment.value}
-                    onChange={handleChangeAssessment}
-                    fullWidth
-                >
-                    {assessments.map((assessment, idx) => <MenuItem key={assessment} value={idx}>
-                        {"⭐️".repeat(idx + 1)}
-                        {"☆".repeat(4 - idx - 1)}
-                        {" "}
-                        {assessment}
-                    </MenuItem>
-                    )}
-                </Select>
-            </Grid>
-            <Grid item xs={8} sm="auto" px={1}>
-                <Stack direction={{ xs: "row-reverse", md: "column" }} alignItems="center" color="primary">
-                    <Box>アピール</Box>
-                    <Switch
-                        checked={skill.appeal}
-                        onChange={(e, newValue) => onChangeAppeal(newValue)} />
-                </Stack>
-            </Grid>
-            <Grid item xs={4} sm="auto" px={1}>
-                <Stack direction="row" justifyContent={{ xs: "flex-end", md: "start" }} alignItems="center">
-                    <IconButton onClick={() => setOpenMenu(true)} ref={btnRef}>
-                        <MoreVert />
-                    </IconButton>
-                    <Menu open={openMenu} onClose={() => setOpenMenu(false)} anchorEl={btnRef.current}>
-                        <MenuItem onClick={handleMoveToUp}>
-                            <ListItemIcon>
-                                <KeyboardDoubleArrowUp />
-                            </ListItemIcon>
-                            一つ上へ
+        <Box p={1} sx={t => ({ bgcolor: t.palette.background.paper })} overflow="auto">
+            <Grid container width="100%">
+                <Grid item xs="auto" px={1} color={t => t.palette.primary.main}>
+                    {/* TODO SKILL ICON */}
+                    #
+                </Grid>
+                <Grid item xs px={1}>
+                    <InputBase
+                        value={skill.name}
+                        onChange={e => onChangeName(e.target.value)}
+                        fullWidth
+                        placeholder='スキル名を入力'
+                        sx={{ fontWeight: "bold" }}
+                    />
+                </Grid>
+                <Grid item xs="auto" px={1}>
+                    <Select
+                        variant='standard'
+                        value={skill.assessment.value}
+                        onChange={handleChangeAssessment}
+                        fullWidth
+                    >
+                        {assessments.map((assessment, idx) => <MenuItem key={assessment} value={idx}>
+                            {"⭐️".repeat(idx + 1)}
+                            {"☆".repeat(4 - idx - 1)}
+                            {" "}
+                            {assessment}
                         </MenuItem>
-                        <MenuItem onClick={handleMoveToDown}>
-                            <ListItemIcon>
-                                <KeyboardDoubleArrowDown />
-                            </ListItemIcon>
-                            一つ下へ
-                        </MenuItem>
-                        <MenuItem onClick={handleDelete}>
-                            <ListItemIcon>
-                                <Delete />
-                            </ListItemIcon>
-                            削除
-                        </MenuItem>
-                    </Menu>
-                </Stack>
+                        )}
+                    </Select>
+                </Grid>
+                <Grid item xs="auto" px={1}>
+                    <TextEditButton
+                        icon={responsive(<><Edit /></>, <></>)}
+                        label="コメントを入力"
+                        value={skill.comment}
+                        onChange={e => onChangeComment(e.target.value)}
+                        placeholder='コメントを入力'
+                        multiline rows={3}
+                    />
+                </Grid>
             </Grid>
-        </Grid>
+            <Grid container justifyContent="flex-end">
+                <Grid item xs="auto" px={1}>
+                    <Stack direction="row" alignItems="center">
+                        <Box>アピール</Box>
+                        <Switch
+                            checked={skill.appeal}
+                            onChange={(e, newValue) => onChangeAppeal(newValue)} />
+                    </Stack>
+                </Grid>
+                <Grid item xs="auto" px={1}>
+                    <Stack direction="row" justifyContent={{ xs: "flex-end", md: "start" }} alignItems="center">
+                        <IconButton onClick={() => setOpenMenu(true)} ref={btnRef}>
+                            <MoreVert />
+                        </IconButton>
+                        <Menu open={openMenu} onClose={() => setOpenMenu(false)} anchorEl={btnRef.current}>
+                            <MenuItem onClick={handleMoveToUp}>
+                                <ListItemIcon>
+                                    <KeyboardDoubleArrowUp />
+                                </ListItemIcon>
+                                一つ上へ
+                            </MenuItem>
+                            <MenuItem onClick={handleMoveToDown}>
+                                <ListItemIcon>
+                                    <KeyboardDoubleArrowDown />
+                                </ListItemIcon>
+                                一つ下へ
+                            </MenuItem>
+                            <MenuItem onClick={handleDelete}>
+                                <ListItemIcon>
+                                    <Delete />
+                                </ListItemIcon>
+                                削除
+                            </MenuItem>
+                        </Menu>
+                    </Stack>
+                </Grid>
+            </Grid>
+        </Box>
     );
 })
 
@@ -630,72 +646,82 @@ const EditableProfItem: FC<EditableProfItemProps> = React.memo(function Editable
         onDelete()
     };
     return (
-        <Grid container p={1} sx={t => ({ bgcolor: t.palette.background.paper })} justifyContent="flex-end">
-            <Grid item xs="auto" sm="auto" px={1} color={t => t.palette.secondary.main}>
-                #
+        <Box p={1} sx={t => ({ bgcolor: t.palette.background.paper })} overflow="auto">
+            <Grid container alignItems="center">
+                <Grid item xs="auto" px={1}>
+                    <Box color="secondary.main">
+                        #
+                    </Box>
+                </Grid>
+                <Grid item xs>
+                    <InputBase
+                        value={profItem.name}
+                        onChange={e => onChangeName(e.target.value)}
+                        placeholder='項目名を入力'
+                        fullWidth
+                        sx={{ fontWeight: "bold", display: "inline" }}
+                    />
+                </Grid>
             </Grid>
-            <Grid item xs px={1}>
-                <InputBase
-                    value={profItem.name}
-                    onChange={e => onChangeName(e.target.value)}
-                    placeholder='項目名を入力'
-                    fullWidth
-                    sx={{ fontWeight: "bold" }} />
+            <Grid container justifyContent="flex-end" alignItems="center">
+                <Grid item xs={12} sm px={1}>
+                    <ProfItemValueEdit
+                        name={profItem.name}
+                        value={profItem.value}
+                        onChange={value => onChangeValue(value)}
+                    />
+                </Grid>
+                <Grid item xs="auto" sm="auto" px={1}>
+                    <TextEditButton
+                        color="secondary"
+                        icon={responsive(<><Edit /></>, <></>)}
+                        label="コメントを入力"
+                        value={profItem.comment}
+                        onChange={e => onChangeComment(e.target.value)}
+                        placeholder='コメントを入力'
+                        multiline rows={3}
+                    />
+                </Grid>
             </Grid>
-            <Grid item xs={12} px={1}>
-                <ProfItemValueEdit
-                    name={profItem.name}
-                    value={profItem.value}
-                    onChange={value => onChangeValue(value)}
-                />
+            <Grid container justifyContent="flex-end">
+                <Grid item xs="auto" px={1}>
+                    <Stack direction="row" justifyContent={{ xs: "flex-end", md: "start" }} alignItems="center">
+                        アピール
+                        <Switch
+                            checked={profItem.appeal}
+                            onChange={(e, newValue) => onChangeAppeal(newValue)}
+                            color="secondary" />
+                    </Stack>
+                </Grid>
+                <Grid item xs="auto" px={1}>
+                    <Stack direction="row" justifyContent={{ xs: "flex-end", md: "start" }} alignItems="center">
+                        <IconButton onClick={() => setOpenMenu(true)} ref={btnRef}>
+                            <MoreVert />
+                        </IconButton>
+                        <Menu open={openMenu} onClose={() => setOpenMenu(false)} anchorEl={btnRef.current}>
+                            <MenuItem onClick={handleMoveToUp}>
+                                <ListItemIcon>
+                                    <KeyboardDoubleArrowUp />
+                                </ListItemIcon>
+                                一つ上に移動
+                            </MenuItem>
+                            <MenuItem onClick={handleMoveToDown}>
+                                <ListItemIcon>
+                                    <KeyboardDoubleArrowDown />
+                                </ListItemIcon>
+                                一つ下に移動
+                            </MenuItem>
+                            <MenuItem onClick={handleDelete}>
+                                <ListItemIcon>
+                                    <Delete />
+                                </ListItemIcon>
+                                削除
+                            </MenuItem>
+                        </Menu>
+                    </Stack>
+                </Grid>
             </Grid>
-            <Grid item xs="auto" sm="auto" px={1}>
-                <TextEditButton
-                    icon={responsive(<><Edit /></>, <></>)}
-                    label="コメントを入力"
-                    value={profItem.comment}
-                    onChange={e => onChangeComment(e.target.value)}
-                    placeholder='コメントを入力'
-                    multiline rows={3}
-                />
-            </Grid>
-            <Grid item xs="auto" px={1}>
-                <Stack direction="row" justifyContent={{ xs: "flex-end", md: "start" }} alignItems="center">
-                    アピール
-                    <Switch
-                        checked={profItem.appeal}
-                        onChange={(e, newValue) => onChangeAppeal(newValue)}
-                        color="secondary" />
-                </Stack>
-            </Grid>
-            <Grid item xs="auto" px={1}>
-                <Stack direction="row" justifyContent={{ xs: "flex-end", md: "start" }} alignItems="center">
-                    <IconButton onClick={() => setOpenMenu(true)} ref={btnRef}>
-                        <MoreVert />
-                    </IconButton>
-                    <Menu open={openMenu} onClose={() => setOpenMenu(false)} anchorEl={btnRef.current}>
-                        <MenuItem onClick={handleMoveToUp}>
-                            <ListItemIcon>
-                                <KeyboardDoubleArrowUp />
-                            </ListItemIcon>
-                            一つ上に移動
-                        </MenuItem>
-                        <MenuItem onClick={handleMoveToDown}>
-                            <ListItemIcon>
-                                <KeyboardDoubleArrowDown />
-                            </ListItemIcon>
-                            一つ下に移動
-                        </MenuItem>
-                        <MenuItem onClick={handleDelete}>
-                            <ListItemIcon>
-                                <Delete />
-                            </ListItemIcon>
-                            削除
-                        </MenuItem>
-                    </Menu>
-                </Stack>
-            </Grid>
-        </Grid>
+        </Box>
     );
 })
 
@@ -854,10 +880,29 @@ const OutputSection: FC<OutputSectionProps> = React.memo(function OutputSection(
             <Snackbar
                 open={!!snackbarContent}
                 onClose={() => setSnackbarContent(null)}
-                autoHideDuration={6000}
+                autoHideDuration={3000}
                 message={snackbarContent}
             />
         </LayoutContent>
     );
 })
 
+
+interface FooterSectionProps {
+}
+const FooterSection: FC<FooterSectionProps> = () => {
+    return (
+        <LayoutContent bgcolor="background.paper" minHeight="50vh" position="relative">
+            <Box sx={{
+                position: "absolute",
+                bottom: 0,
+                right: 0,
+                padding: 2,
+            }}>
+                <Fab color="primary" href="#">
+                    <KeyboardArrowUp />
+                </Fab>
+            </Box>
+        </LayoutContent>
+    );
+}

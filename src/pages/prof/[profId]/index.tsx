@@ -1,3 +1,4 @@
+import SeoHead from '@/components/Seo';
 import BaseLayout from '@/components/layout/BaseLayout';
 import LayoutContent from '@/components/layout/LayoutContent';
 import { themeTypeToComponent } from '@/components/prof';
@@ -35,10 +36,20 @@ interface ProfViewHeadProps {
     prof: Prof
 }
 const ProfViewHead: FC<ProfViewHeadProps> = ({ prof }) => {
+    const skillNames = prof.skills.filter(sk => sk.appeal).map(sk => sk.name).join(" , ")
     return (
-        <Head>
-            <title>{`${prof.name}のプロフィール`}</title>
-        </Head>
+        <>
+            <Head>
+                {/* <title>{`${prof.name}のプロフィール`}</title> */}
+            </Head>
+            <SeoHead
+                pageTitle={`${prof.name}のプロフィール`}
+                pageDescription={`${prof.freeSpace} | ${skillNames} | ${skillNames}`}
+                pageImg={`/api/prof/${prof.profId}/og`}
+                pageImgWidth={1200}
+                pageImgHeight={630}
+            />
+        </>
     );
 }
 

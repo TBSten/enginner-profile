@@ -1,21 +1,24 @@
 import Center from '@/components/Center';
 import ColorPicker from '@/components/ColorPicker';
+import TextEditButton from '@/components/TextEditButton';
 import ThemeTypePicker from '@/components/ThemeTypePicker';
 import BaseLayout from '@/components/layout/BaseLayout';
 import LayoutContent from '@/components/layout/LayoutContent';
+import { copyToClipboard } from '@/lib/client/copy';
 import { chooseFile } from '@/lib/client/file';
 import { useLoading } from '@/lib/client/loading';
 import { useResponsive } from '@/lib/client/responsive';
 import { getLocal, saveLocal } from '@/lib/client/saveLocal';
 import { getProf } from '@/lib/server/prof';
 import { Assessment, Prof, ProfItem, ProfItemValue, ProfSchema, Skill, ThemeType } from '@/types';
-import { Add, Delete, KeyboardDoubleArrowDown, KeyboardDoubleArrowUp, MoreVert } from '@mui/icons-material';
-import { Alert, Box, Button, CircularProgress, Container, Divider, Grid, IconButton, InputBase, ListItemIcon, Menu, MenuItem, Select, SelectProps, Stack, Switch, useTheme } from '@mui/material';
+import { Add, ContentCopy, Delete, Edit, KeyboardDoubleArrowDown, KeyboardDoubleArrowUp, MoreVert } from '@mui/icons-material';
+import { Alert, Box, Button, CircularProgress, Container, Divider, Grid, IconButton, InputBase, ListItemIcon, Menu, MenuItem, Select, SelectProps, Snackbar, Stack, Switch, Tooltip, useTheme } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import React, { FC, MouseEventHandler, useCallback, useEffect, useRef, useState } from "react";
+import React, { FC, MouseEventHandler, useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { TwitterIcon, TwitterShareButton } from 'react-share';
 import { z } from 'zod';
 
 const LOCAL_PROF_KEY = "enginner_profile_local_prof"
@@ -25,14 +28,6 @@ interface Props {
 }
 const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
     const [prof, setProf] = useState(defaultProf)
-    const handleSaveProf = useCallback(async () => {
-        // TODO save prof
-        saveLocal(LOCAL_PROF_KEY, prof)
-        await fetch(`/api/prof/${prof.profId}`, {
-            method: "PUT",
-            body: JSON.stringify(prof),
-        })
-    }, [prof])
     useEffect(() => {
         const saveData = getLocal(LOCAL_PROF_KEY)
         if (saveData === null) { return }
@@ -41,8 +36,17 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
             setProf(savedProf)
         } else {
             // 保存されたものを編集できない
+            console.warn("")
         }
     }, [defaultProf.profId])
+    const handleSaveProf = useCallback(async () => {
+        // TODO save prof
+        saveLocal(LOCAL_PROF_KEY, prof)
+        await fetch(`/api/prof/${prof.profId}`, {
+            method: "PUT",
+            body: JSON.stringify(prof),
+        })
+    }, [prof])
 
     const handleChangeName =
         useCallback((name: string) => setProf(p => ({ ...p, name })), [])
@@ -91,6 +95,7 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
                 <Divider />
                 <OutputSection
                     profId={prof.profId}
+                    name={prof.name}
                     publish={prof.publish}
                     onChangePublish={handleChangePublich}
                     onSave={handleSaveProf}
@@ -295,6 +300,27 @@ const SillsSection: FC<SkillsSectionProps> = React.memo(function SillsSection({ 
     const handleDelete = (idx: number) => () => {
         onChangeSkills(p => p.filter((_, i) => idx !== i));
     };
+    const handleMoveToUp = (idx: number) => () => {
+        console.log("up ", idx)
+        onChangeSkills(p => {
+            if (idx === 0) return p
+            const newSkills = [...p]
+            const work = newSkills[idx]
+            newSkills[idx] = newSkills[idx - 1]
+            newSkills[idx - 1] = work
+            return newSkills
+        })
+    }
+    const handleMoveToDown = (idx: number) => () => {
+        onChangeSkills(p => {
+            if (idx === p.length - 1) return p
+            const newSkills = [...p]
+            const work = newSkills[idx]
+            newSkills[idx] = newSkills[idx + 1]
+            newSkills[idx + 1] = work
+            return p
+        })
+    }
     return (
         <LayoutContent>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -312,7 +338,10 @@ const SillsSection: FC<SkillsSectionProps> = React.memo(function SillsSection({ 
                     onChangeComment={handleChangeComment(idx)}
                     onChangeAssessment={handleChangeAssessment(idx)}
                     onChangeAppeal={handleChangeAppeal(idx)}
-                    onDelete={handleDelete(idx)} />
+                    onDelete={handleDelete(idx)}
+                    onMoveToUp={handleMoveToUp(idx)}
+                    onMoveToDown={handleMoveToDown(idx)}
+                />
             </Box>
             )}
             {skills.length === 0 &&
@@ -345,9 +374,13 @@ interface EditableSkillProps {
     onChangeAssessment: (value: Assessment) => void
     onChangeAppeal: (value: boolean) => void
     onDelete: () => void
+    onMoveToUp: () => void
+    onMoveToDown: () => void
 }
 const EditableSkill: FC<EditableSkillProps> = React.memo(function EditableSkill({
-    skill, onChangeName, onChangeComment, onChangeAssessment, onChangeAppeal, onDelete,
+    skill,
+    onChangeName, onChangeComment, onChangeAssessment, onChangeAppeal, onDelete,
+    onMoveToUp, onMoveToDown,
 }) {
     const [openMenu, setOpenMenu] = useState(false);
     const btnRef = useRef<HTMLButtonElement>(null);
@@ -358,6 +391,14 @@ const EditableSkill: FC<EditableSkillProps> = React.memo(function EditableSkill(
             comment: assessments[value],
         });
     };
+    const handleMoveToUp = () => {
+        setOpenMenu(false)
+        onMoveToUp()
+    }
+    const handleMoveToDown = () => {
+        setOpenMenu(false)
+        onMoveToDown()
+    }
     const handleDelete = () => {
         setOpenMenu(false);
         onDelete();
@@ -407,8 +448,22 @@ const EditableSkill: FC<EditableSkillProps> = React.memo(function EditableSkill(
                         <MoreVert />
                     </IconButton>
                     <Menu open={openMenu} onClose={() => setOpenMenu(false)} anchorEl={btnRef.current}>
+                        <MenuItem onClick={handleMoveToUp}>
+                            <ListItemIcon>
+                                <KeyboardDoubleArrowUp />
+                            </ListItemIcon>
+                            一つ上へ
+                        </MenuItem>
+                        <MenuItem onClick={handleMoveToDown}>
+                            <ListItemIcon>
+                                <KeyboardDoubleArrowDown />
+                            </ListItemIcon>
+                            一つ下へ
+                        </MenuItem>
                         <MenuItem onClick={handleDelete}>
-                            <Delete />
+                            <ListItemIcon>
+                                <Delete />
+                            </ListItemIcon>
                             削除
                         </MenuItem>
                     </Menu>
@@ -561,7 +616,7 @@ const EditableProfItem: FC<EditableProfItemProps> = React.memo(function Editable
 }) {
     const [openMenu, setOpenMenu] = useState(false);
     const btnRef = useRef<HTMLButtonElement>(null);
-    const { isPc, responsive } = useResponsive()
+    const { responsive } = useResponsive()
     const handleMoveToUp = () => {
         setOpenMenu(false)
         onMoveToUp()
@@ -575,12 +630,11 @@ const EditableProfItem: FC<EditableProfItemProps> = React.memo(function Editable
         onDelete()
     };
     return (
-        <Grid container p={1} sx={t => ({ bgcolor: t.palette.background.paper })}>
-            <Grid item xs="auto" px={1} color={t => t.palette.secondary.main}>
-                {/* TODO SKILL ICON */}
+        <Grid container p={1} sx={t => ({ bgcolor: t.palette.background.paper })} justifyContent="flex-end">
+            <Grid item xs="auto" sm="auto" px={1} color={t => t.palette.secondary.main}>
                 #
             </Grid>
-            <Grid item xs="auto" sm="auto" px={1}>
+            <Grid item xs px={1}>
                 <InputBase
                     value={profItem.name}
                     onChange={e => onChangeName(e.target.value)}
@@ -588,23 +642,24 @@ const EditableProfItem: FC<EditableProfItemProps> = React.memo(function Editable
                     fullWidth
                     sx={{ fontWeight: "bold" }} />
             </Grid>
-            <Grid item xs={12} sm px={1}>
+            <Grid item xs={12} px={1}>
                 <ProfItemValueEdit
                     name={profItem.name}
                     value={profItem.value}
                     onChange={value => onChangeValue(value)}
                 />
             </Grid>
-            <Grid item xs={12} sm px={1}>
-                <InputBase
+            <Grid item xs="auto" sm="auto" px={1}>
+                <TextEditButton
+                    icon={responsive(<><Edit /></>, <></>)}
+                    label="コメントを入力"
                     value={profItem.comment}
                     onChange={e => onChangeComment(e.target.value)}
                     placeholder='コメントを入力'
-                    fullWidth={isPc}
-                    multiline rows={responsive(2, 1)}
+                    multiline rows={3}
                 />
             </Grid>
-            <Grid item xs={8} sm="auto" px={1}>
+            <Grid item xs="auto" px={1}>
                 <Stack direction="row" justifyContent={{ xs: "flex-end", md: "start" }} alignItems="center">
                     アピール
                     <Switch
@@ -613,7 +668,7 @@ const EditableProfItem: FC<EditableProfItemProps> = React.memo(function Editable
                         color="secondary" />
                 </Stack>
             </Grid>
-            <Grid item xs={4} sm="auto" px={1}>
+            <Grid item xs="auto" px={1}>
                 <Stack direction="row" justifyContent={{ xs: "flex-end", md: "start" }} alignItems="center">
                     <IconButton onClick={() => setOpenMenu(true)} ref={btnRef}>
                         <MoreVert />
@@ -707,16 +762,20 @@ const ProfItemValueEdit: FC<ProfItemValueEditProps> = ({ name, value, onChange }
 
 interface OutputSectionProps {
     profId: string
+    name: string
     publish: boolean
     onChangePublish: (publish: boolean) => void
     onSave: () => Promise<void>
 }
 const OutputSection: FC<OutputSectionProps> = React.memo(function OutputSection({
-    profId, publish, onChangePublish, onSave,
+    profId, name,
+    publish, onChangePublish, onSave,
 }) {
     const theme = useTheme();
+    const [snackbarContent, setSnackbarContent] = useState<string | null>(null)
     const handleClickPublishButton = async () => {
         await onSave();
+        setSnackbarContent("保存しました")
     };
     const router = useRouter()
     const handleGotoProfPage: MouseEventHandler<HTMLAnchorElement> = async (e) => {
@@ -724,6 +783,14 @@ const OutputSection: FC<OutputSectionProps> = React.memo(function OutputSection(
         const href = e.currentTarget.href
         await onSave()
         router.push(href)
+    }
+
+    const [loc, initLoc] = useReducer<() => Location | null>(() => location, null)
+    useEffect(() => initLoc(), [])
+    const profUrl = `${loc?.origin}/prof/${profId}`
+    const handleCopy = async () => {
+        await copyToClipboard(profUrl)
+        setSnackbarContent("URLをコピーしました")
     }
     return (
         <LayoutContent bgcolor={theme.palette.background.paper}>
@@ -750,19 +817,47 @@ const OutputSection: FC<OutputSectionProps> = React.memo(function OutputSection(
                     </Button>
                 </Stack>
 
-                <Stack direction="row" justifyContent="flex-end" alignItems="center">
-                    <Switch
-                        checked={publish}
-                        onChange={(_, newValue) => onChangePublish(newValue)} />
-                    <Box component="span" pr={2}>
-                        公開
-                    </Box>
+                <Stack direction="row" justifyContent="flex-end" alignItems="center" py={1}>
+                    <Tooltip title="オンにするとあなた以外の人の人が自己紹介ページのURLを使ってあなたの譜r歩を見ることができます！">
+                        <Stack direction="row" alignItems="center">
+                            <Switch
+                                checked={publish}
+                                onChange={(_, newValue) => onChangePublish(newValue)} />
+                            <Box component="span" pr={2}>
+                                公開
+                            </Box>
+                        </Stack>
+                    </Tooltip>
                     <Button variant="contained" onClick={handleClickPublishButton}>
                         保存する
                     </Button>
                 </Stack>
-
+                <Stack direction="row" justifyContent="flex-end" alignItems="center">
+                    <Tooltip title="URLをコピー">
+                        <IconButton onClick={handleCopy}>
+                            <ContentCopy />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Twitterでシェア">
+                        <Box p={1}>
+                            <TwitterShareButton
+                                url={profUrl}
+                                hashtags={["エンジニアプロフ"]}
+                                title={`${name} のプロフを公開しました！\n\n`}
+                            >
+                                <TwitterIcon size={32} round />
+                            </TwitterShareButton>
+                        </Box>
+                    </Tooltip>
+                </Stack>
             </Container>
+            <Snackbar
+                open={!!snackbarContent}
+                onClose={() => setSnackbarContent(null)}
+                autoHideDuration={6000}
+                message={snackbarContent}
+            />
         </LayoutContent>
     );
 })
+

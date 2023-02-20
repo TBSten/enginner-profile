@@ -14,11 +14,6 @@ const ThemeTypePicker: FC<ThemeTypePickerProps> = ({
     type, onChange, label = "テーマを選択"
 }) => {
     const [openThemeDialog, setOpenThemeDialog] = useState(false)
-    const [selectedType, setSelectedType] = useState<ThemeType>(type)
-    const handleChangeType = () => {
-        onChange(selectedType)
-        setOpenThemeDialog(false)
-    }
     return (
         <>
             <Box sx={{ cursor: "pointer" }} onClick={() => setOpenThemeDialog(true)} maxWidth={450}>
@@ -44,9 +39,9 @@ const ThemeTypePicker: FC<ThemeTypePickerProps> = ({
 
                         <Grid item xs={12} sm={6}>
                             <SelectableBox
-                                select={selectedType === "fashionable"}
-                                onSelect={() => setSelectedType("fashionable")}
-                                onUnselect={() => setSelectedType("fashionable")}
+                                select={type === "fashionable"}
+                                onSelect={() => onChange("fashionable")}
+                                onUnselect={() => onChange("fashionable")}
                             >
                                 <BasicTypeImage />
                             </SelectableBox>
@@ -54,9 +49,9 @@ const ThemeTypePicker: FC<ThemeTypePickerProps> = ({
 
                         <Grid item xs={12} sm={6}>
                             <SelectableBox
-                                select={selectedType === "bad"}
-                                onSelect={() => setSelectedType("bad")}
-                                onUnselect={() => setSelectedType("bad")}
+                                select={type === "bad"}
+                                onSelect={() => onChange("bad")}
+                                onUnselect={() => onChange("bad")}
                             >
                                 <BadTypeImage />
                             </SelectableBox>
@@ -64,9 +59,9 @@ const ThemeTypePicker: FC<ThemeTypePickerProps> = ({
 
                         <Grid item xs={12} sm={6}>
                             <SelectableBox
-                                select={selectedType === "files"}
-                                onSelect={() => setSelectedType("files")}
-                                onUnselect={() => setSelectedType("files")}
+                                select={type === "files"}
+                                onSelect={() => onChange("files")}
+                                onUnselect={() => onChange("files")}
                             >
                                 <FileTypeImage />
                             </SelectableBox>
@@ -75,7 +70,7 @@ const ThemeTypePicker: FC<ThemeTypePickerProps> = ({
                     </Grid>
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="text" onClick={handleChangeType}>
+                    <Button variant="text" onClick={() => setOpenThemeDialog(false)}>
                         閉じる
                     </Button>
                 </DialogActions>

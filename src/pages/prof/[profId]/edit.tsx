@@ -14,7 +14,8 @@ import { Alert, Box, Button, CircularProgress, Container, Divider, Grid, IconBut
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
-import React, { FC, useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from 'next/router';
+import React, { FC, MouseEventHandler, useCallback, useEffect, useRef, useState } from "react";
 import { z } from 'zod';
 
 const LOCAL_PROF_KEY = "enginner_profile_local_prof"
@@ -24,7 +25,7 @@ interface Props {
 }
 const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
     const [prof, setProf] = useState(defaultProf)
-    const handleSave = useCallback(async () => {
+    const handleSaveProf = useCallback(async () => {
         // TODO save prof
         saveLocal(LOCAL_PROF_KEY, prof)
         await fetch(`/api/prof/${prof.profId}`, {
@@ -92,7 +93,7 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
                     profId={prof.profId}
                     publish={prof.publish}
                     onChangePublish={handleChangePublich}
-                    onSave={handleSave}
+                    onSave={handleSaveProf}
                 />
             </BaseLayout>
         </>
@@ -708,15 +709,22 @@ interface OutputSectionProps {
     profId: string
     publish: boolean
     onChangePublish: (publish: boolean) => void
-    onSave: () => void
+    onSave: () => Promise<void>
 }
 const OutputSection: FC<OutputSectionProps> = React.memo(function OutputSection({
     profId, publish, onChangePublish, onSave,
 }) {
     const theme = useTheme();
-    const handleClickPublishButton = () => {
-        onSave();
+    const handleClickPublishButton = async () => {
+        await onSave();
     };
+    const router = useRouter()
+    const handleGotoProfPage: MouseEventHandler<HTMLAnchorElement> = async (e) => {
+        e.preventDefault()
+        const href = e.currentTarget.href
+        await onSave()
+        router.push(href)
+    }
     return (
         <LayoutContent bgcolor={theme.palette.background.paper}>
             <Container maxWidth="sm">
@@ -727,7 +735,7 @@ const OutputSection: FC<OutputSectionProps> = React.memo(function OutputSection(
                         sx={{ px: 2, py: 3, borderRadius: "9999px", textAlign: "center" }}
                         size='large'
                         href={`/prof/${profId}`}
-                        onClick={onSave}
+                        onClick={handleGotoProfPage}
                     >
                         自己紹介ページを表示
                     </Button>

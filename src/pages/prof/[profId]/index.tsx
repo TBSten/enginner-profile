@@ -43,6 +43,9 @@ const ProfViewHead: FC<ProfViewHeadProps> = ({ prof }) => {
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+    // キャッシュを無効化
+    ctx.res.setHeader('Cache-Control', 'max-age=0')
+
     const profId = ctx.query.profId as string
     const prof = await getProf(profId)
     if (!prof) {

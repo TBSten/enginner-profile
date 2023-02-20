@@ -1,5 +1,6 @@
 import { theme as muiTheme } from "@/styles/theme";
 import { ProfSchema } from "@/types";
+import { alpha } from "@mui/material";
 import { ImageResponse } from "@vercel/og";
 import { NextRequest } from "next/server";
 import { CSSProperties } from "react";
@@ -10,56 +11,80 @@ export const config = {
 
 const width = 1200
 const height = 630
-const fontSizeBase = Math.min(width / 15, height / 4)
 const fontSize = {
-    sm: fontSizeBase * 0.5,
-    md: fontSizeBase,
-    lg: fontSizeBase * 2,
+    sm: Math.min(width / 30, height / 10),
+    md: Math.min(width / 15, height / 4),
+    lg: Math.min(width / 10, height / 2),
+}
+const maxLength = {
+    name: 10,
+    freeSpace: 15 * 2 * 2,
 }
 
 export default async function handler(req: NextRequest) {
     const { origin, searchParams } = new URL(req.url);
     const profId = searchParams.get("profId")
     if (!profId) throw new Error("profId is null")
+
     const prof = await fetchProf(origin, profId)
-    const freeSpaceMaxLength = 15 * 2 * 2
-    const freeSpace = prof.freeSpace.length >= freeSpaceMaxLength
-        ? prof.freeSpace.slice(0, freeSpaceMaxLength - 1) + "..."
+    const name = prof.name.length >= maxLength.name
+        ? prof.name.slice(0, maxLength.name - 1) + "..."
+        : prof.name
+    const freeSpace = prof.freeSpace.length >= maxLength.freeSpace
+        ? prof.freeSpace.slice(0, maxLength.freeSpace - 1) + "..."
         : prof.freeSpace
 
     return new ImageResponse(
         (
             <div style={{
-                fontSize: fontSize.md,
                 ...center,
-                justifyContent: "space-between",
-                ...full,
-                background: prof.theme.color,
-                color: muiTheme.palette.getContrastText(prof.theme.color),
-                padding: fontSize.md,
+                fontSize: fontSize.md,
+                lineHeight: 0.8,
+                position: "relative",
+                background: muiTheme.palette.getContrastText(prof.theme.color),
             }}>
+                {/* background */}
+                <img
+                    src={prof.icon}
+                    style={{
+                        position: "absolute",
+                        left: 0,
+                        top: 0,
+                        ...full,
+                        objectFit: "cover",
+                    }}
+                />
+                {/* content */}
                 <div style={{
                     ...center,
                     ...full,
-                    background: "rgba(255,255,255,0.95)",
-                    color: "black",
-                    borderRadius: fontSize.sm,
+                    color: muiTheme.palette.getContrastText(prof.theme.color),
                     padding: fontSize.sm,
                 }}>
                     <div style={{
                         ...center,
-                        width: "100%",
-                        fontSize: fontSize.lg,
-                        fontWeight: "bold",
+                        ...full,
+                        justifyContent: "space-around",
+                        background: alpha(prof.theme.color, 0.95),
+                        color: muiTheme.palette.getContrastText(prof.theme.color),
+                        borderRadius: fontSize.sm,
+                        padding: fontSize.sm,
                     }}>
-                        {prof.name}
-                    </div>
-                    <div style={{
-                        ...center,
-                        width: "100%",
-                        fontSize: fontSize.sm,
-                    }}>
-                        {freeSpace}
+                        <div style={{
+                            ...center,
+                            width: "100%",
+                            fontSize: fontSize.lg,
+                            fontWeight: "bold",
+                        }}>
+                            {name}
+                        </div>
+                        <div style={{
+                            ...center,
+                            width: "100%",
+                            fontSize: fontSize.sm,
+                        }}>
+                            {freeSpace}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -67,6 +92,7 @@ export default async function handler(req: NextRequest) {
         {
             width,
             height,
+
         }
     )
 }

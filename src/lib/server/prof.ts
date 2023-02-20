@@ -11,7 +11,7 @@ export const addNewProf = async (input: Partial<Prof>): Promise<Prof> => {
         profId,
         name: "名無しユーザ",
         freeSpace: "",
-        icon: "",
+        icon: "/enginner-prof-icon.png",
         skills: [],
         profItems: [],
         publish: false,

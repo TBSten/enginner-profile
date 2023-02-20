@@ -7,8 +7,11 @@ const handler: NextApiHandler = async (req, res) => {
     if (req.method === "GET") {
         const havePermission = true /* TODO: Permission */
         const prof = await getProf(profId)
-        if (!prof?.publish || havePermission) {
-            return res.status(404).json({ msg: "prof not found or invalid request" })
+        if (!prof?.publish) {
+            return res.status(404).json({ msg: "prof not found" })
+        }
+        if (!havePermission) {
+            return res.status(401).json({ msg: "you do not have permission" })
         }
         return res.json(prof)
     } else if (req.method === "PUT") {

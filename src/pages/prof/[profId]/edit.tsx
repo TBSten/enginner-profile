@@ -122,14 +122,22 @@ export default ProfDetailPage;
 
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
-    const id = ctx.query.profId as string
-    const prof = await getProf(id)
-    if (prof === null) {
-        return { notFound: true }
-    }
-    return {
-        props: {
-            prof,
+    try {
+        const id = ctx.query.profId as string
+        const prof = await getProf(id)
+        if (prof === null) {
+            return { notFound: true }
+        }
+        return {
+            props: {
+                prof,
+            }
+        }
+    } catch (e) {
+        console.error("error happened!")
+        console.error(e)
+        return {
+            notFound: true,
         }
     }
 }

@@ -130,17 +130,25 @@ const FooterSection: FC<FooterSectionProps> = ({ prof }) => {
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
-    // キャッシュを無効化
-    ctx.res.setHeader('Cache-Control', 'max-age=5')
+    try {
+        // キャッシュを無効化
+        ctx.res.setHeader('Cache-Control', 'max-age=5')
 
-    const profId = ctx.query.profId as string
-    const prof = await getProf(profId)
-    if (!prof) {
-        return { notFound: true }
-    }
-    return {
-        props: {
-            prof,
+        const profId = ctx.query.profId as string
+        const prof = await getProf(profId)
+        if (!prof) {
+            return { notFound: true }
+        }
+        return {
+            props: {
+                prof,
+            }
+        }
+    } catch (e) {
+        console.error("error happened!")
+        console.error(e)
+        return {
+            notFound: true,
         }
     }
 }

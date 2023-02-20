@@ -113,7 +113,7 @@ export default async function handler(req: NextRequest) {
 const fetchProf = async (origin: string, profId: string) => {
     const fetchUrl = new URL(origin)
     fetchUrl.pathname = `/api/prof/${profId}`
-    const res = await fetch(fetchUrl).then(r => r.json())
+    const res = await fetch(fetchUrl.toString()).then(r => r.json())
     const prof = ProfSchema.parse(res)
     return prof
 }

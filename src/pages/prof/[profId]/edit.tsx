@@ -11,7 +11,7 @@ import { useResponsive } from '@/lib/client/responsive';
 import { getLocal, saveLocal } from '@/lib/client/saveLocal';
 import { getProf } from '@/lib/server/prof';
 import { Assessment, Prof, ProfItem, ProfItemValue, ProfSchema, Skill, ThemeType } from '@/types';
-import { Add, ContentCopy, Delete, Edit, KeyboardArrowUp, KeyboardDoubleArrowDown, KeyboardDoubleArrowUp, MoreVert } from '@mui/icons-material';
+import { Add, ContentCopy, Delete, Edit, KeyboardArrowUp, KeyboardDoubleArrowDown, KeyboardDoubleArrowUp, MoreVert, Save } from '@mui/icons-material';
 import { Alert, Box, Button, CircularProgress, Container, Divider, Fab, Grid, IconButton, InputBase, ListItemIcon, Menu, MenuItem, Select, SelectProps, Snackbar, Stack, Switch, Tooltip, useTheme } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
@@ -28,6 +28,7 @@ interface Props {
 }
 const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
     const [prof, setProf] = useState(defaultProf)
+    const [snackbarContent, setSnackbarContent] = useState<null | string>(null)
     useEffect(() => {
         const saveData = getLocal(LOCAL_PROF_KEY)
         if (saveData === null) { return }
@@ -36,7 +37,7 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
             setProf(savedProf)
         } else {
             // 保存されたものを編集できない
-            console.warn("")
+            console.warn("can not save")
         }
     }, [defaultProf.profId])
     const handleSaveProf = useCallback(async () => {
@@ -46,6 +47,7 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
             method: "PUT",
             body: JSON.stringify(prof),
         })
+        setSnackbarContent("保存しました")
     }, [prof])
 
     const handleChangeName =
@@ -99,8 +101,19 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
                     publish={prof.publish}
                     onChangePublish={handleChangePublich}
                     onSave={handleSaveProf}
+                    onSnackbarShow={(text) => setSnackbarContent(text)}
                 />
                 <FooterSection />
+                <Fixed
+                    onSave={handleSaveProf}
+                />
+                <Snackbar
+                    open={!!snackbarContent}
+                    onClose={() => setSnackbarContent(null)}
+                    autoHideDuration={3000}
+                    message={snackbarContent}
+                />
+
             </BaseLayout>
         </>
     );
@@ -792,16 +805,17 @@ interface OutputSectionProps {
     publish: boolean
     onChangePublish: (publish: boolean) => void
     onSave: () => Promise<void>
+    onSnackbarShow: (text: string) => void
 }
 const OutputSection: FC<OutputSectionProps> = React.memo(function OutputSection({
     profId, name,
     publish, onChangePublish, onSave,
+    onSnackbarShow,
 }) {
     const theme = useTheme();
-    const [snackbarContent, setSnackbarContent] = useState<string | null>(null)
     const handleClickPublishButton = async () => {
         await onSave();
-        setSnackbarContent("保存しました")
+        onSnackbarShow("保存しました")
     };
     const router = useRouter()
     const handleGotoProfPage: MouseEventHandler<HTMLAnchorElement> = async (e) => {
@@ -816,7 +830,7 @@ const OutputSection: FC<OutputSectionProps> = React.memo(function OutputSection(
     const profUrl = `${loc?.origin}/prof/${profId}`
     const handleCopy = async () => {
         await copyToClipboard(profUrl)
-        setSnackbarContent("URLをコピーしました")
+        onSnackbarShow("URLをコピーしました")
     }
     return (
         <LayoutContent bgcolor={theme.palette.background.paper}>
@@ -869,7 +883,7 @@ const OutputSection: FC<OutputSectionProps> = React.memo(function OutputSection(
                             <TwitterShareButton
                                 url={profUrl}
                                 hashtags={["エンジニアプロフ"]}
-                                title={`${name} のプロフを公開しました！\n\n`}
+                                title={`${name} のプロフ \n\n`}
                             >
                                 <TwitterIcon size={32} round />
                             </TwitterShareButton>
@@ -877,12 +891,6 @@ const OutputSection: FC<OutputSectionProps> = React.memo(function OutputSection(
                     </Tooltip>
                 </Stack>
             </Container>
-            <Snackbar
-                open={!!snackbarContent}
-                onClose={() => setSnackbarContent(null)}
-                autoHideDuration={3000}
-                message={snackbarContent}
-            />
         </LayoutContent>
     );
 })
@@ -896,7 +904,7 @@ const FooterSection: FC<FooterSectionProps> = () => {
             <Box sx={{
                 position: "absolute",
                 bottom: 0,
-                right: 0,
+                left: 0,
                 padding: 2,
             }}>
                 <Fab color="primary" href="#">
@@ -906,3 +914,23 @@ const FooterSection: FC<FooterSectionProps> = () => {
         </LayoutContent>
     );
 }
+
+interface FixedProps {
+    onSave: () => void
+}
+const Fixed: FC<FixedProps> = ({
+    onSave,
+}) => {
+    return (
+        <>
+            <Fab
+                color="primary"
+                onClick={onSave}
+                sx={{ position: "fixed", margin: 2, bottom: 0, right: 0, }}
+            >
+                <Save />
+            </Fab>
+        </>
+    );
+}
+

@@ -5,8 +5,9 @@ import { NextApiHandler } from "next";
 const handler: NextApiHandler = async (req, res) => {
     const profId = req.query.profId as string
     if (req.method === "GET") {
+        const havePermission = true /* TODO: Permission */
         const prof = await getProf(profId)
-        if (!prof?.publish) {
+        if (!prof?.publish || havePermission) {
             return res.status(404).json({ msg: "prof not found or invalid request" })
         }
         return res.json(prof)

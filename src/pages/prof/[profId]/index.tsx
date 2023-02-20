@@ -104,7 +104,7 @@ const HeaderSection: FC<HeaderSectionProps> = ({ prof }) => {
                             <TwitterShareButton
                                 url={`${loc?.origin}/prof/${prof.profId}`}
                                 hashtags={["エンジニアプロフ"]}
-                                title={`${prof.name} のプロフを公開しました！\n\n`}
+                                title={`${prof.name} のプロフ \n\n`}
                             >
                                 <TwitterIcon size={32} round />
                             </TwitterShareButton>

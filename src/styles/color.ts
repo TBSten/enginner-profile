@@ -11,3 +11,5 @@ export const colors = [
     ["ピンク", "#B61972"],
 ] as const
 export const defaultColor = colors[5]
+
+export const twitter = "rgb(0, 172, 237)"

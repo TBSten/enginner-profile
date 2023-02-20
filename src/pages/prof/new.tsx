@@ -1,7 +1,7 @@
 import { ProfSchema } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Container, InputBase, Stack } from '@mui/material';
-import { NextPage } from 'next';
+import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from "next/router";
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -58,3 +58,13 @@ const NewProfPage: NextPage<Props> = ({ }) => {
     );
 }
 export default NewProfPage;
+
+export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+    console.error("test error log")
+    console.warn("test warn log")
+    console.log("test log log")
+    console.log("--------------------")
+    return {
+        props: {}
+    }
+}

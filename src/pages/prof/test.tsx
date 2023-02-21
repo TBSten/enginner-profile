@@ -1,4 +1,6 @@
+import Center from '@/components/Center';
 import { db } from '@/lib/server/firestore';
+import { Box, Stack, Switch, TextField, Tooltip } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 
 interface Props {
@@ -10,6 +12,13 @@ const Test: NextPage<Props> = ({ log }) => {
         <>
             <h1>テストページ</h1>
             <div>
+                <Box></Box>
+                <Stack></Stack>
+                <Center></Center>
+                <Tooltip title="test">
+                    <TextField></TextField>
+                </Tooltip>
+                <Switch />
                 {JSON.stringify(log, null, 3)}
             </div>
         </>

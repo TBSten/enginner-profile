@@ -1,20 +1,28 @@
+import { db } from '@/lib/server/firestore';
 import { GetServerSideProps, NextPage } from 'next';
 
 interface Props {
+    log: unknown
 }
-const Test: NextPage<Props> = ({ }) => {
+const Test: NextPage<Props> = ({ log }) => {
+    console.log(log)
     return (
-        <>test page</>
+        <>
+            <h1>テストページ</h1>
+            <div>
+                {JSON.stringify(log, null, 3)}
+            </div>
+        </>
     );
 }
 export default Test;
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
-    const ok = Math.random() >= 0.5
-    if (ok)
-        return {
-            props: {}
-        }
-    else
-        throw new Error("for debug error")
+    const doc = await db.collection("test").add({ at: new Date() })
+    const log = await doc.get()
+    return {
+        props: {
+            log: log.data(),
+        },
+    }
 }

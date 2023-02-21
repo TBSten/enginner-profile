@@ -69,7 +69,8 @@ const ProfViewHead: FC<ProfViewHeadProps> = ({ prof }) => {
             <SeoHead
                 pageTitle={`${prof.name}のプロフィール`}
                 pageDescription={`${prof.freeSpace} | ${skillNames} | ${profItems}`}
-                pageImg={`/api/prof/${prof.profId}/og`}
+                // pageImg={`/api/prof/${prof.profId}/og`}
+                pageImg={`/enginner-prof-icon.png`}
                 pageImgWidth={1200}
                 pageImgHeight={630}
             />

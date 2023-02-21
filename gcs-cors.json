@@ -1,7 +1,9 @@
 [
     {
         "origin": [
-            "http://localhost:3000/"
+            "http://localhost:3000/",
+            "https://enginner-prof-caaeia4yea-uc.a.run.app",
+            "https://enginner-prof.info"
         ],
         "method": [
             "GET",

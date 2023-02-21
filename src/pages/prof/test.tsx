@@ -7,7 +7,6 @@ interface Props {
     log: unknown
 }
 const Test: NextPage<Props> = ({ log }) => {
-    console.log(log)
     return (
         <>
             <h1>テストページ</h1>

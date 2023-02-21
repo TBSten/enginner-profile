@@ -5,7 +5,6 @@ const OnlyClient = <Props extends {},>(Component: FC<Props>) => {
         const [mounted, mount] = useReducer(() => true, false)
         useEffect(() => mount(), [])
         if (!mounted) return <></>
-        console.log("render")
         return <Component {...props} />
     }
     return Comp

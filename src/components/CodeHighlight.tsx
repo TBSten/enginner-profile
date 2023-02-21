@@ -11,7 +11,6 @@ const CodeHighlight: FC<CodeHighlightProps> = ({ lang, children }) => {
         mount()
     }, [])
     useEffect(() => {
-        console.log(isMounted)
         if (isMounted) {
             (async () => {
                 await import(`prismjs/components/prism-${lang}`)

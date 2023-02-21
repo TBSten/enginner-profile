@@ -5,10 +5,12 @@ import LayoutContent from '@/components/layout/LayoutContent';
 import { themeTypeToComponent } from '@/components/prof';
 import { getProf } from '@/lib/server/prof';
 import { theme as baseTheme } from "@/styles/theme";
-import { Prof } from '@/types';
-import { Box, Stack, ThemeProvider, Tooltip, createTheme } from '@mui/material';
+import { Prof, ProfSchema } from '@/types';
+import { FiberNew } from '@mui/icons-material';
+import { Box, Button, Stack, ThemeProvider, Tooltip, createTheme } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import { FC, useEffect, useMemo, useReducer } from 'react';
 import { TwitterIcon, TwitterShareButton } from 'react-share';
 
@@ -17,10 +19,20 @@ interface Props {
 }
 const ProfViewPage: NextPage<Props> = ({ prof }) => {
     const ProfViewComponent = themeTypeToComponent(prof.theme.type)
-    const handleCreateFromProf = () => {
+    const router = useRouter()
+    const handleNewFromProf = async () => {
         // profをもとに新しいプロフを新規作成
+        const templateProfId = prof.profId
+        const res = await fetch(`/api/prof`, {
+            method: "POST",
+            body: JSON.stringify({
+                templateProfId,
+            }),
+        }).then(r => r.json())
+        const newProf = ProfSchema.parse(res)
+        console.log(newProf)
+        router.push(`/prof/${newProf.profId}/edit`)
     }
-
     const theme = useMemo(() => {
         const theme = createTheme(baseTheme, {
             palette: {
@@ -45,9 +57,12 @@ const ProfViewPage: NextPage<Props> = ({ prof }) => {
                     <LayoutContent>
                         <ProfViewComponent
                             prof={prof}
-                            createFromProf={handleCreateFromProf}
                         />
                     </LayoutContent>
+                    <ActionsSection
+                        prof={prof}
+                        onNewFromProf={handleNewFromProf}
+                    />
                     <FooterSection
                         prof={prof}
                     />
@@ -113,6 +128,30 @@ const HeaderSection: FC<HeaderSectionProps> = ({ prof }) => {
                     }
                 </Box>
             </Stack>
+        </LayoutContent>
+    );
+}
+
+interface ActionsSectionProps {
+    prof: Prof
+    onNewFromProf: () => void
+}
+const ActionsSection: FC<ActionsSectionProps> = ({
+    prof, onNewFromProf,
+}) => {
+    return (
+        <LayoutContent>
+            <Box bgcolor="background.paper" p={2} borderRadius="1rem">
+                <Center>
+                    <Button
+                        variant='outlined'
+                        startIcon={<FiberNew />}
+                        onClick={onNewFromProf}
+                    >
+                        このプロフをもとに新しいプロフを作成
+                    </Button>
+                </Center>
+            </Box>
         </LayoutContent>
     );
 }

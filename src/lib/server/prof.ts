@@ -31,6 +31,18 @@ export const addNewProf = async (input: Partial<Prof>): Promise<Prof> => {
     await profs.doc(profId).set(prof)
     return prof
 }
+export const addProfFromTemplate = async (templateProfId: string, input: Partial<Prof>): Promise<Prof> => {
+    const profId = uuidv4()
+    const templateProf = await getProf(templateProfId)
+    const prof: Prof = {
+        ...defaultProf(profId),
+        ...templateProf,
+        ...input,
+        profId,
+    }
+    await profs.doc(profId).set(prof)
+    return prof
+}
 
 export const getProf = async (profId: string): Promise<Prof | null> => {
     const snapshot = await profs.doc(profId).get()

@@ -5,11 +5,7 @@ export const themeTypes = [
     "fashionable",  // おしゃれ
     "files",        // json,csvなどのファイル
 ] as const
-export const ThemeTypeSchema = z.union([
-    z.literal("bad"),
-    z.literal("fashionable"),
-    z.literal("files"),
-])
+export const ThemeTypeSchema = z.enum(themeTypes)
 export type ThemeType = z.infer<typeof ThemeTypeSchema>
 export const AssessmentSchema = z.object({
     value: z.number(),

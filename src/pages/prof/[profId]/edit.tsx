@@ -866,7 +866,7 @@ const OutputSection: FC<OutputSectionProps> = React.memo(function OutputSection(
                 </Stack>
 
                 <Stack direction="row" justifyContent="flex-end" alignItems="center" py={1}>
-                    <Tooltip title="オンにするとあなた以外の人の人が自己紹介ページのURLを使ってあなたの譜r歩を見ることができます！">
+                    <Tooltip title="オンにするとあなた以外の人の人が自己紹介ページのURLを使ってあなたのプロフを見ることができます！">
                         <Stack direction="row" alignItems="center">
                             <Switch
                                 checked={publish}

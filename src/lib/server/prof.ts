@@ -5,9 +5,9 @@ import { db } from "./firestore";
 
 const profs = db.collection("profs")
 
-const defaultProf = (profId: string): Prof => ({
+const getDefaultProf = (profId: string): Prof => ({
     profId,
-    name: "名無しユーザ",
+    name: "あなたの名前",
     freeSpace: "",
     icon: "https://storage.googleapis.com/enginner-prof-user-images/default-icon-1",
     skills: [],
@@ -25,7 +25,7 @@ const defaultProf = (profId: string): Prof => ({
 export const addNewProf = async (input: Partial<Prof>): Promise<Prof> => {
     const profId = uuidv4()
     const prof: Prof = {
-        ...defaultProf(profId),
+        ...getDefaultProf(profId),
         ...input,
     }
     await profs.doc(profId).set(prof)
@@ -34,11 +34,15 @@ export const addNewProf = async (input: Partial<Prof>): Promise<Prof> => {
 export const addProfFromTemplate = async (templateProfId: string, input: Partial<Prof>): Promise<Prof> => {
     const profId = uuidv4()
     const templateProf = await getProf(templateProfId)
+    const defaultProf = getDefaultProf(profId)
     const prof: Prof = {
-        ...defaultProf(profId),
+        ...defaultProf,
         ...templateProf,
+        // IDと名前はテンプレートの値を使用しない
+        profId: defaultProf.profId,
+        name: defaultProf.name,
+        // 残りは入力をもとに上書き
         ...input,
-        profId,
     }
     await profs.doc(profId).set(prof)
     return prof

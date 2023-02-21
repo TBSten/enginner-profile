@@ -3,11 +3,13 @@ import SeoHead from '@/components/Seo';
 import BaseLayout from '@/components/layout/BaseLayout';
 import LayoutContent from '@/components/layout/LayoutContent';
 import { themeTypeToComponent } from '@/components/prof';
+import { copyToClipboard } from '@/lib/client/copy';
+import { useGlobalDialog } from '@/lib/client/dialog';
 import { getProf } from '@/lib/server/prof';
 import { theme as baseTheme } from "@/styles/theme";
 import { Prof, ProfSchema } from '@/types';
-import { FiberNew } from '@mui/icons-material';
-import { Box, Button, Stack, ThemeProvider, Tooltip, createTheme } from '@mui/material';
+import { ContentCopy, FiberNew } from '@mui/icons-material';
+import { Box, Button, IconButton, Stack, ThemeProvider, Tooltip, createTheme } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -20,7 +22,9 @@ interface Props {
 const ProfViewPage: NextPage<Props> = ({ prof }) => {
     const ProfViewComponent = themeTypeToComponent(prof.theme.type)
     const router = useRouter()
+    const { showDialog } = useGlobalDialog()
     const handleNewFromProf = async () => {
+        showDialog(`${prof.name}さんのプロフをもとに新しいプロフを作成中...`)
         // profをもとに新しいプロフを新規作成
         const templateProfId = prof.profId
         const res = await fetch(`/api/prof`, {
@@ -30,7 +34,7 @@ const ProfViewPage: NextPage<Props> = ({ prof }) => {
             }),
         }).then(r => r.json())
         const newProf = ProfSchema.parse(res)
-        console.log(newProf)
+        showDialog(`新しいプロフへ移動中...`)
         router.push(`/prof/${newProf.profId}/edit`)
     }
     const theme = useMemo(() => {
@@ -101,6 +105,11 @@ interface HeaderSectionProps {
 const HeaderSection: FC<HeaderSectionProps> = ({ prof }) => {
     const [loc, initLoc] = useReducer<() => Location | null>(() => location, null)
     useEffect(() => initLoc(), [])
+    const profUrl = `${loc?.origin}/prof/${prof.profId}`
+    const handleCopy = async () => {
+        await copyToClipboard(profUrl)
+        // onSnackbarShow("URLをコピーしました")
+    }
     return (
         <LayoutContent>
             <Stack
@@ -114,19 +123,28 @@ const HeaderSection: FC<HeaderSectionProps> = ({ prof }) => {
                 <Box>
                     {prof.name} さんのプロフィール
                 </Box>
-                <Box>
+                <Stack direction="row" justifyContent="flex-end" alignItems="center">
                     {prof.publish &&
-                        <Tooltip title="Twitterでシェア">
-                            <TwitterShareButton
-                                url={`${loc?.origin}/prof/${prof.profId}`}
-                                hashtags={["エンジニアプロフ"]}
-                                title={`${prof.name} のプロフ \n\n`}
-                            >
-                                <TwitterIcon size={32} round />
-                            </TwitterShareButton>
-                        </Tooltip>
+                        <>
+                            <Tooltip title="Twitterでシェア">
+                                <TwitterShareButton
+                                    url={`${loc?.origin}/prof/${prof.profId}`}
+                                    hashtags={["エンジニアプロフ"]}
+                                    title={`${prof.name} のプロフ \n\n`}
+                                >
+                                    <IconButton>
+                                        <TwitterIcon size={32} round />
+                                    </IconButton>
+                                </TwitterShareButton>
+                            </Tooltip>
+                            <Tooltip title="URLをコピー">
+                                <IconButton onClick={handleCopy}>
+                                    <ContentCopy />
+                                </IconButton>
+                            </Tooltip>
+                        </>
                     }
-                </Box>
+                </Stack>
             </Stack>
         </LayoutContent>
     );

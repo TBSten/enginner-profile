@@ -1,8 +1,9 @@
 import { ProfSchema } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Button, Container, InputBase, Stack } from '@mui/material';
+import { Box, Button, Container, Dialog, DialogContent, InputBase, Stack } from '@mui/material';
 import { NextPage } from 'next';
 import { useRouter } from "next/router";
+import { useState } from "react";
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -18,13 +19,17 @@ const NewProfPage: NextPage<Props> = ({ }) => {
     })
     const router = useRouter()
     const onNewProf = handleSubmit(async (data) => {
+        setDialogContent("プロフを新規作成中...")
         const res = await fetch(`/api/prof/`, {
             method: "POST",
             body: JSON.stringify(data),
         }).then(r => r.json())
         const newProf = ProfSchema.parse(res)
+        setDialogContent("プロフ編集画面に移動中")
         router.push(`/prof/${newProf.profId}/edit`)
     })
+
+    const [dialogContent, setDialogContent] = useState<null | string>(null)
     return (
         <>
             <Box bgcolor={t => t.palette.grey[200]} width="100%" height="100%">
@@ -54,6 +59,11 @@ const NewProfPage: NextPage<Props> = ({ }) => {
                     </Container>
                 </Stack>
             </Box>
+            <Dialog open={dialogContent !== null} onClose={() => setDialogContent(null)}>
+                <DialogContent>
+                    {dialogContent}
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

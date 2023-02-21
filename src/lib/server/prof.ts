@@ -5,23 +5,27 @@ import { db } from "./firestore";
 
 const profs = db.collection("profs")
 
+const defaultProf = (profId: string): Prof => ({
+    profId,
+    name: "名無しユーザ",
+    freeSpace: "",
+    icon: "https://storage.googleapis.com/enginner-prof-user-images/default-icon-1",
+    skills: [],
+    profItems: [],
+    publish: false,
+    createAt: Date.now(),
+    updateAt: Date.now(),
+    theme: {
+        type: "fashionable",
+        color: defaultColor[1],
+    },
+    publishAt: null,
+})
+
 export const addNewProf = async (input: Partial<Prof>): Promise<Prof> => {
     const profId = uuidv4()
     const prof: Prof = {
-        profId,
-        name: "名無しユーザ",
-        freeSpace: "",
-        icon: "/enginner-prof-icon.png",
-        skills: [],
-        profItems: [],
-        publish: false,
-        createAt: Date.now(),
-        updateAt: Date.now(),
-        theme: {
-            type: "fashionable",
-            color: defaultColor[1],
-        },
-        publishAt: null,
+        ...defaultProf(profId),
         ...input,
     }
     await profs.doc(profId).set(prof)

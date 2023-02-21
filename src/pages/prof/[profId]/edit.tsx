@@ -122,12 +122,18 @@ export default ProfDetailPage;
 
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+    console.log("prof/[profId]/edit gSSP", 1)
     try {
+        console.log("prof/[profId]/edit gSSP", 2)
         const id = ctx.query.profId as string
+        console.log("prof/[profId]/edit gSSP", 3, id)
         const prof = await getProf(id)
+        console.log("prof/[profId]/edit gSSP", 4, prof)
         if (prof === null) {
+            console.log("prof/[profId]/edit gSSP", 5, prof)
             return { notFound: true }
         }
+        console.log("prof/[profId]/edit gSSP", 5, prof)
         return {
             props: {
                 prof,

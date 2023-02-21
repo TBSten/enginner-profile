@@ -130,15 +130,21 @@ const FooterSection: FC<FooterSectionProps> = ({ prof }) => {
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+    console.log("prof/[profId]/index gSSP", 1)
     try {
         // キャッシュを無効化
         ctx.res.setHeader('Cache-Control', 'max-age=5')
+        console.log("prof/[profId]/index gSSP", 2)
 
         const profId = ctx.query.profId as string
+        console.log("prof/[profId]/index gSSP", 3, profId)
         const prof = await getProf(profId)
+        console.log("prof/[profId]/index gSSP", 4, prof)
         if (!prof) {
+            console.log("prof/[profId]/index gSSP", 5, prof)
             return { notFound: true }
         }
+        console.log("prof/[profId]/index gSSP", 6, prof)
         return {
             props: {
                 prof,

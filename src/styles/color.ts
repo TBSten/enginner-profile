@@ -10,6 +10,7 @@ export const colors = [
     ["紫", "#744199"],
     ["ピンク", "#B61972"],
 ] as const
-export const defaultColor = colors[5]
+// export const defaultColor = colors[5]
+export const getRandomColor = () => colors[Math.floor(Math.random() * colors.length)]
 
 export const twitter = "rgb(0, 172, 237)"

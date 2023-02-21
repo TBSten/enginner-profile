@@ -1,4 +1,4 @@
-import { defaultColor } from "@/styles/color";
+import { getRandomColor } from "@/styles/color";
 import { Prof, ProfSchema } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "./firestore";
@@ -17,7 +17,7 @@ const defaultProf = (profId: string): Prof => ({
     updateAt: Date.now(),
     theme: {
         type: "fashionable",
-        color: defaultColor[1],
+        color: getRandomColor()[1],
     },
     publishAt: null,
 })

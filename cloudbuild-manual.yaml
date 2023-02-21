@@ -1,0 +1,13 @@
+steps:
+# Build the container image
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/enginner-profile/enginner-prof', '.']
+# Push the container image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/enginner-profile/enginner-prof']
+# Deploy container image to Cloud Run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args: ['run', 'deploy', 'enginner-prof', '--image', 'gcr.io/enginner-profile/enginner-prof', '--region', 'us-central1', "--allow-unauthenticated"]
+images:
+- gcr.io/enginner-profile/enginner-prof

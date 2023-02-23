@@ -1,5 +1,7 @@
 import Center from '@/components/Center';
 import ColorPicker from '@/components/ColorPicker';
+import MenuButton from '@/components/MenuButton';
+import Right from '@/components/Right';
 import TextEditButton from '@/components/TextEditButton';
 import ThemeTypePicker from '@/components/ThemeTypePicker';
 import BaseLayout from '@/components/layout/BaseLayout';
@@ -17,7 +19,7 @@ import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import React, { FC, MouseEventHandler, useCallback, useEffect, useReducer, useRef, useState } from "react";
+import React, { FC, MouseEventHandler, ReactNode, useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { TwitterIcon, TwitterShareButton } from 'react-share';
 import { z } from 'zod';
 
@@ -65,9 +67,9 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
     const handleChangeSkills: SkillsSectionProps["onChangeSkills"] =
         useCallback(updater => setProf(p => ({ ...p, skills: updater(p.skills) })), [])
     const handleChangeSkillComment =
-        useCallback((skillComment: string) => setProf(p => ({ ...p, skillComment })), [])
+        useCallback((skillComment: string | null) => setProf(p => ({ ...p, skillComment })), [])
     const handleChangeProfItemComment =
-        useCallback((profItemComment: string) => setProf(p => ({ ...p, profItemComment })), [])
+        useCallback((profItemComment: string | null) => setProf(p => ({ ...p, profItemComment })), [])
     const handleChangeProfItems: ProfItemsSectionProps["onChangeProfItems"] =
         useCallback(updater => setProf(p => ({ ...p, profItems: updater(p.profItems) })), [])
     const handleChangePublich: OutputSectionProps["onChangePublish"] =
@@ -92,11 +94,12 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
                     color={prof.theme.color}
                     onChangeColor={handleChangeColor}
                 />
-                <SillsSection
+                <SkillsSection
                     skills={prof.skills}
                     skillComment={prof.skillComment}
                     onChangeSkills={handleChangeSkills}
                     onChangeSkillComment={handleChangeSkillComment}
+                    onAddSkillComment={() => handleChangeSkillComment("✅ ここにスキルの説明を入力します。\n❗️ スキルの説明は編集画面でのみ表示されます")}
                 />
                 <ProfItemsSection
                     profItems={prof.profItems}
@@ -283,11 +286,15 @@ const defaultSkill = (): Skill => ({
 })
 interface SkillsSectionProps {
     skills: Skill[]
-    skillComment: string
+    skillComment: string | null
     onChangeSkills: (updater: ((p: Skill[]) => Skill[])) => void
-    onChangeSkillComment: (comment: string) => void
+    onChangeSkillComment: (comment: string | null) => void
+    onAddSkillComment: () => void
 }
-const SillsSection: FC<SkillsSectionProps> = React.memo(function SillsSection({ skills, skillComment, onChangeSkills, onChangeSkillComment }) {
+const SkillsSection: FC<SkillsSectionProps> = React.memo(function SillsSection({
+    skills, skillComment,
+    onChangeSkills, onChangeSkillComment, onAddSkillComment,
+}) {
     const handleChangeName = (idx: number) => (newName: string) => {
         onChangeSkills(p => {
             const newSkills = [...p];
@@ -355,24 +362,52 @@ const SillsSection: FC<SkillsSectionProps> = React.memo(function SillsSection({ 
             return p
         })
     }
+    const [openMenu, setOpenMenu] = useState(false)
+    const handleAddSkillComment = () => {
+        setOpenMenu(false)
+        onAddSkillComment()
+    }
+    const menuItems: ReactNode[] = []
+    if (skillComment === null)
+        menuItems.push(
+            <MenuItem onClick={handleAddSkillComment}>
+                スキルの説明を追加
+            </MenuItem>
+        )
     return (
         <LayoutContent>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Box fontWeight="bold" fontSize="1.5em" color={t => t.palette.primary.main}>
+            <Grid container alignItems="center">
+                <Grid item xs fontWeight="bold" fontSize="1.5em" color={t => t.palette.primary.main}>
                     スキル
-                </Box>
-                <Box>
+                </Grid>
+                <Grid item xs="auto">
                     {skills.length}個のスキル
-                </Box>
-            </Stack>
+                </Grid>
+                <Grid item xs="auto">
+                    {menuItems.length >= 1 &&
+                        <MenuButton open={openMenu} onOpen={() => setOpenMenu(true)} onClose={() => setOpenMenu(false)}>
+                            {menuItems}
+                        </MenuButton>
+                    }
+                </Grid>
+            </Grid>
             <Box>
-                <TextField
-                    value={skillComment} onChange={e => onChangeSkillComment(e.target.value)}
-                    placeholder='スキルの説明を入力してください'
-                    multiline rows={3}
-                    fullWidth
-                    color="primary"
-                />
+                {skillComment !== null &&
+                    <Stack>
+                        <TextField
+                            value={skillComment} onChange={e => onChangeSkillComment(e.target.value)}
+                            placeholder='スキルの説明を入力してください'
+                            multiline rows={3}
+                            fullWidth
+                            color="primary"
+                        />
+                        <Right>
+                            <Button onClick={() => onChangeSkillComment(null)}>
+                                説明を削除
+                            </Button>
+                        </Right>
+                    </Stack>
+                }
             </Box>
             {skills.map((skill, idx) => <Box key={idx} py={0.5}>
                 <EditableSkill
@@ -543,8 +578,8 @@ const defaultProfItem = (): ProfItem => ({
 interface ProfItemsSectionProps {
     profItems: ProfItem[]
     onChangeProfItems: (updater: ((p: ProfItem[]) => ProfItem[])) => void
-    profItemComment: string
-    onChangeProfItemComment: (comment: string) => void
+    profItemComment: string | null
+    onChangeProfItemComment: (comment: string | null) => void
 }
 const ProfItemsSection: FC<ProfItemsSectionProps> = React.memo(function ProfItemsSection({ profItems, onChangeProfItems, profItemComment, onChangeProfItemComment }) {
     const handleAddProfItem = () => {
@@ -615,24 +650,52 @@ const ProfItemsSection: FC<ProfItemsSectionProps> = React.memo(function ProfItem
     const handleDeleteProfItem = (idx: number) => () => {
         onChangeProfItems(p => p.filter((_, i) => idx !== i));
     };
+    const handleAddProfItemComment = () => {
+        setOpenMenu(false)
+        onChangeProfItemComment("✅ ここに自己紹介 項目 の説明を入力します。\n❗️ 自己紹介 項目 の説明は編集画面でのみ表示されます")
+    }
+    const [openMenu, setOpenMenu] = useState(false)
+    const menuItems: ReactNode[] = []
+    if (profItemComment === null)
+        menuItems.push(
+            <MenuItem onClick={handleAddProfItemComment}>
+                自己紹介 項目 の説明を追加
+            </MenuItem>
+        )
     return (
         <LayoutContent>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Box fontWeight="bold" fontSize="1.5em" color={t => t.palette.secondary.main}>
+            <Grid container alignItems="center">
+                <Grid item xs fontWeight="bold" fontSize="1.5em" color={t => t.palette.secondary.main}>
                     自己紹介 項目
-                </Box>
-                <Box>
-                    {profItems.length}個の項目
-                </Box>
-            </Stack>
+                </Grid>
+                <Grid item xs="auto">
+                    {profItems.length}個のスキル
+                </Grid>
+                <Grid item xs="auto">
+                    {menuItems.length >= 1 &&
+                        <MenuButton open={openMenu} onOpen={() => setOpenMenu(true)} onClose={() => setOpenMenu(false)}>
+                            {menuItems}
+                        </MenuButton>
+                    }
+                </Grid>
+            </Grid>
             <Box>
-                <TextField
-                    value={profItemComment} onChange={e => onChangeProfItemComment(e.target.value)}
-                    placeholder='自己紹介 項目 の説明を入力してください'
-                    multiline rows={3}
-                    fullWidth
-                    color="secondary"
-                />
+                {profItemComment !== null &&
+                    <>
+                        <TextField
+                            value={profItemComment} onChange={e => onChangeProfItemComment(e.target.value)}
+                            placeholder='自己紹介 項目 の説明を入力してください'
+                            multiline rows={3}
+                            fullWidth
+                            color="secondary"
+                        />
+                        <Right>
+                            <Button color="secondary" onClick={() => onChangeProfItemComment(null)}>
+                                説明を削除
+                            </Button>
+                        </Right>
+                    </>
+                }
             </Box>
             {profItems.map((profItem, idx) => <Box key={idx} py={0.5}>
                 <EditableProfItem
@@ -806,22 +869,26 @@ const ProfItemValueEdit: FC<ProfItemValueEditProps> = ({ name, value, onChange }
                     />
                 }
                 {value.type === "link" &&
-                    <InputBase
-                        value={value.link}
-                        onChange={e => onChange({ type: "link", link: e.target.value })}
-                        placeholder={name + 'のリンクを入力'}
-                        fullWidth
-                    />
+                    <Grid container alignItems="center">
+                        <Grid item xs="auto">
+                            リンク:
+                        </Grid>
+                        <Grid item xs>
+                            <InputBase
+                                value={value.link}
+                                onChange={e => onChange({ type: "link", link: e.target.value })}
+                                placeholder={name + 'のリンクを入力'}
+                                fullWidth
+                            />
+
+                        </Grid>
+                    </Grid>
                 }
             </Box>
             <IconButton ref={btnRef} color="secondary" onClick={() => setOpenMenu(true)}>
                 <MoreVert />
             </IconButton>
             <Menu open={openMenu} onClose={() => setOpenMenu(false)} anchorEl={btnRef.current}>
-                <MenuItem disabled>
-                    タイプ
-                </MenuItem>
-                <Divider />
                 <MenuItem
                     onClick={() => onChange({ type: "text", text: "" })}
                     disabled={value.type === "text"}

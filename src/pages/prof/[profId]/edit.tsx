@@ -1,5 +1,6 @@
 import Center from '@/components/Center';
 import ColorPicker from '@/components/ColorPicker';
+import DefaultImageSelector from '@/components/DefaultImageSelector';
 import MenuButton from '@/components/MenuButton';
 import Right from '@/components/Right';
 import TextEditButton from '@/components/TextEditButton';
@@ -14,7 +15,7 @@ import { getLocal, saveLocal } from '@/lib/client/saveLocal';
 import { getProf } from '@/lib/server/prof';
 import { Assessment, Prof, ProfItem, ProfItemValue, ProfSchema, Skill, ThemeType } from '@/types';
 import { Add, ContentCopy, Delete, Edit, KeyboardArrowUp, KeyboardDoubleArrowDown, KeyboardDoubleArrowUp, MoreVert, Save } from '@mui/icons-material';
-import { Alert, Box, Button, CircularProgress, Container, Divider, Fab, Grid, IconButton, InputBase, ListItemIcon, Menu, MenuItem, Select, SelectProps, Snackbar, Stack, Switch, TextField, Tooltip, useTheme } from '@mui/material';
+import { Alert, Box, Button, CircularProgress, Container, Divider, Fab, Grid, IconButton, InputBase, ListItemIcon, Menu, MenuItem, Popover, Select, SelectProps, Snackbar, Stack, Switch, TextField, Tooltip, useTheme } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -183,7 +184,7 @@ const OverviewSection: FC<OverviewProps> = ({ name, freeSpace, icon, onChangeNam
     const theme = useTheme()
     const [isUploading, withUpload] = useLoading()
     const handleUploadIcon = async () => {
-        const file = await chooseFile()
+        const file = await chooseFile("image/*")
 
         withUpload(async () => {
             const res = await fetch(`/api/image/upload`).then(r => r.json())
@@ -192,34 +193,60 @@ const OverviewSection: FC<OverviewProps> = ({ name, freeSpace, icon, onChangeNam
                 method: "PUT",
                 body: file,
             })
-
             onChangeIcon(publicUrl)
         })
     }
 
     const iconSize = 100
+    const imgRef = useRef<HTMLImageElement>(null)
+    const [openImgPopover, setOpenImgPopover] = useState(false)
     return (
         <LayoutContent bgcolor={theme.palette.background.paper}>
             <Grid container spacing={2} direction="row" alignItems="center">
                 <Grid item xs={12} md="auto">
-                    <Stack direction="column" alignItems="center" onClick={handleUploadIcon}>
+                    <Stack direction="column" alignItems="center" onClick={() => setOpenImgPopover(true)}>
                         <Box borderRadius={2} overflow="hidden" width={iconSize} height={iconSize}>
-                            <Image
-                                src={icon}
-                                alt={name}
-                                width={iconSize}
-                                height={iconSize}
-                                style={{ objectFit: "cover" }}
-                            />
-                            {isUploading &&
-                                <CircularProgress />
-                            }
+                            <Box position="relative">
+                                {isUploading &&
+                                    <Center position="absolute" left={0} top={0} width="100%" height="100%" bgcolor="rgba(0,0,0,0.5)">
+                                        <CircularProgress size={iconSize * 0.9} />
+                                    </Center>
+                                }
+                                <Image
+                                    src={icon}
+                                    alt={name}
+                                    width={iconSize}
+                                    height={iconSize}
+                                    style={{ objectFit: "cover" }}
+                                    ref={imgRef}
+                                />
+                            </Box>
                         </Box>
                         <Box component="span" textAlign="center" width={100} pt={1} fontSize="0.8em">
                             画像を <br />
                             アップロード
                         </Box>
                     </Stack>
+                    <Popover
+                        anchorEl={imgRef.current}
+                        anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "left",
+                        }}
+                        open={openImgPopover}
+                        onClose={() => setOpenImgPopover(false)}
+                    >
+                        <Box p={1} maxWidth="50vw">
+                            <DefaultImageSelector
+                                img={icon}
+                                onChange={(img) => onChangeIcon(img)}
+                            />
+                            <Divider>または</Divider>
+                            <Button onClick={handleUploadIcon} fullWidth>
+                                アイコンをアップロード
+                            </Button>
+                        </Box>
+                    </Popover>
                 </Grid>
                 <Grid item xs={12} md >
                     <InputBase
@@ -370,7 +397,7 @@ const SkillsSection: FC<SkillsSectionProps> = React.memo(function SillsSection({
     const menuItems: ReactNode[] = []
     if (skillComment === null)
         menuItems.push(
-            <MenuItem onClick={handleAddSkillComment}>
+            <MenuItem onClick={handleAddSkillComment} key="add skill comment">
                 スキルの説明を追加
             </MenuItem>
         )
@@ -658,7 +685,7 @@ const ProfItemsSection: FC<ProfItemsSectionProps> = React.memo(function ProfItem
     const menuItems: ReactNode[] = []
     if (profItemComment === null)
         menuItems.push(
-            <MenuItem onClick={handleAddProfItemComment}>
+            <MenuItem onClick={handleAddProfItemComment} key="add profItem comment">
                 自己紹介 項目 の説明を追加
             </MenuItem>
         )

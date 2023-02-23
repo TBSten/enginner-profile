@@ -6,25 +6,30 @@ import { themeTypeToComponent } from '@/components/prof';
 import { copyToClipboard } from '@/lib/client/copy';
 import { useGlobalDialog } from '@/lib/client/dialog';
 import { getProf } from '@/lib/server/prof';
+import { getGoodCount } from '@/lib/server/prof/good';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { theme as baseTheme } from "@/styles/theme";
 import { Prof, ProfSchema } from '@/types';
-import { ContentCopy, FiberNew } from '@mui/icons-material';
+import { ContentCopy, Favorite, FavoriteBorder, FiberNew } from '@mui/icons-material';
 import { Box, Button, IconButton, Stack, ThemeProvider, Tooltip, createTheme } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
+import { getServerSession } from 'next-auth';
+import { useSession } from 'next-auth/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { FC, useEffect, useMemo, useReducer } from 'react';
+import { FC, useEffect, useMemo, useReducer, useState } from 'react';
 import { TwitterIcon, TwitterShareButton } from 'react-share';
 
 interface Props {
     prof: Prof
+    sentGood: boolean
 }
-const ProfViewPage: NextPage<Props> = ({ prof }) => {
+const ProfViewPage: NextPage<Props> = ({ prof, sentGood }) => {
     const ProfViewComponent = themeTypeToComponent(prof.theme.type)
     const router = useRouter()
     const { showDialog } = useGlobalDialog()
     const handleNewFromProf = async () => {
-        showDialog(`${prof.name}さんのプロフをもとに新しいプロフを作成中...`)
+        showDialog(`${prof.name}さんのプロフをもとに新しいプロフを作成中...`, { canClose: false })
         // profをもとに新しいプロフを新規作成
         const templateProfId = prof.profId
         const res = await fetch(`/api/prof`, {
@@ -57,6 +62,7 @@ const ProfViewPage: NextPage<Props> = ({ prof }) => {
                 <BaseLayout>
                     <HeaderSection
                         prof={prof}
+                        sentGood={sentGood}
                     />
                     <LayoutContent>
                         <ProfViewComponent
@@ -101,8 +107,9 @@ const ProfViewHead: FC<ProfViewHeadProps> = ({ prof }) => {
 
 interface HeaderSectionProps {
     prof: Prof
+    sentGood: boolean
 }
-const HeaderSection: FC<HeaderSectionProps> = ({ prof }) => {
+const HeaderSection: FC<HeaderSectionProps> = ({ prof, sentGood: defaultSentGood }) => {
     const [loc, initLoc] = useReducer<() => Location | null>(() => location, null)
     useEffect(() => initLoc(), [])
     const profUrl = `${loc?.origin}/prof/${prof.profId}`
@@ -110,40 +117,73 @@ const HeaderSection: FC<HeaderSectionProps> = ({ prof }) => {
         await copyToClipboard(profUrl)
         // onSnackbarShow("URLをコピーしました")
     }
+    const { data: session, status } = useSession()
+    const [sentGood, setSentGood] = useState(defaultSentGood)
+    const handleGood = async () => {
+        if (sentGood) {
+            setSentGood(false)
+            try {
+                await fetch(`/api/prof/${prof.profId}/good`, {
+                    method: "DELETE",
+                }).then(r => r.json())
+            } catch (e) {
+                setSentGood(true)
+            }
+        } else {
+            setSentGood(true)
+            try {
+                await fetch(`/api/prof/${prof.profId}/good`, {
+                    method: "POST",
+                }).then(r => r.json())
+            } catch (e) {
+                setSentGood(false)
+            }
+        }
+    }
     return (
         <LayoutContent>
             <Stack
                 p={2}
-                direction="row"
+                direction={{ xs: "column", md: "row" }}
                 justifyContent="space-between"
                 borderRadius="1rem"
                 overflow="auto"
                 bgcolor="background.paper"
             >
-                <Box>
+                <Center>
                     {prof.name} さんのプロフィール
-                </Box>
-                <Stack direction="row" justifyContent="flex-end" alignItems="center">
+                </Center>
+                <Stack direction="row" justifyContent="flex-end" alignItems="center" spacing={1}>
                     {prof.publish &&
                         <>
                             <Tooltip title="Twitterでシェア">
-                                <TwitterShareButton
-                                    url={`${loc?.origin}/prof/${prof.profId}`}
-                                    hashtags={["エンジニアプロフ"]}
-                                    title={`${prof.name} のプロフ \n\n`}
-                                >
-                                    <IconButton>
+                                <Center>
+                                    <TwitterShareButton
+                                        url={`${loc?.origin}/prof/${prof.profId}`}
+                                        hashtags={["エンジニアプロフ"]}
+                                        title={`${prof.name} のプロフ \n\n`}
+                                        style={{ display: "flex", justifyContent: "center", alignItems: "center" }}
+                                    >
                                         <TwitterIcon size={32} round />
-                                    </IconButton>
-                                </TwitterShareButton>
+                                    </TwitterShareButton>
+                                </Center>
                             </Tooltip>
                             <Tooltip title="URLをコピー">
-                                <IconButton onClick={handleCopy}>
-                                    <ContentCopy />
-                                </IconButton>
+                                <Center>
+                                    <IconButton onClick={handleCopy}>
+                                        <ContentCopy />
+                                    </IconButton>
+                                </Center>
                             </Tooltip>
                         </>
                     }
+                    <IconButton onClick={handleGood} disabled={status !== "authenticated"}>
+                        {sentGood
+                            ? <Favorite color='primary' />
+                            : <FavoriteBorder />
+                        }
+
+                    </IconButton>
                 </Stack>
             </Stack>
         </LayoutContent>
@@ -188,6 +228,7 @@ const FooterSection: FC<FooterSectionProps> = ({ prof }) => {
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+    const session = await getServerSession(ctx.req, ctx.res, authOptions)
     try {
         // キャッシュを無効化
         ctx.res.setHeader('Cache-Control', 'max-age=5')
@@ -197,9 +238,14 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
         if (!prof) {
             return { notFound: true }
         }
+        const sentGood =
+            (session !== null &&
+                (await getGoodCount(profId, session.user.userId)) === 1
+            )
         return {
             props: {
                 prof,
+                sentGood,
             }
         }
     } catch (e) {

@@ -10,6 +10,7 @@ const Center: FC<CenterProps> = ({ ...boxProps }) => {
             flexDirection="column"
             justifyContent="center"
             alignItems="center"
+            textAlign="center"
             {...boxProps}
         />
     );

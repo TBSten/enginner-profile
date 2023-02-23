@@ -43,7 +43,9 @@ export type ProfItem = z.infer<typeof ProfItemSchema>
 
 export const ProfSchema = z.object({
     profId: z.string(),
+    version: z.string(),
     name: z.string(),
+    authorId: z.string().nullable(),
     icon: z.string(),
     freeSpace: z.string(),
     skills: z.array(SkillSchema),
@@ -59,3 +61,16 @@ export const ProfSchema = z.object({
 })
 export type Prof = z.infer<typeof ProfSchema>
 
+export const GoodToProfSchema = z.object({
+    profId: z.string(),
+    senderId: z.string(),
+    createAt: z.number(),
+})
+export type GoodToProf = z.infer<typeof GoodToProfSchema>
+
+export const UserSchema = z.object({
+    userId: z.string(),
+    type: z.enum(["anonymous", "normal"]),
+    name: z.string(),
+})
+export type User = z.infer<typeof UserSchema>

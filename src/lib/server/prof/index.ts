@@ -1,12 +1,14 @@
 import { getRandomColor } from "@/styles/color";
 import { Prof, ProfSchema } from "@/types";
 import { v4 as uuidv4 } from "uuid";
-import { db } from "./firestore";
+import { db } from "../firestore";
 
-const profs = db.collection("profs")
+export const profs = db.collection("profs")
 
-const getDefaultProf = (profId: string): Prof => ({
+const getDefaultProf = (profId: string, authorId: string | null): Prof => ({
     profId,
+    version: "1.0",
+    authorId,
     name: "あなたの名前",
     freeSpace: "",
     icon: "https://storage.googleapis.com/enginner-prof-user-images/default-icon-1",
@@ -22,19 +24,19 @@ const getDefaultProf = (profId: string): Prof => ({
     publishAt: null,
 })
 
-export const addNewProf = async (input: Partial<Prof>): Promise<Prof> => {
+export const addNewProf = async (input: Partial<Prof>, authorId: string | null): Promise<Prof> => {
     const profId = uuidv4()
     const prof: Prof = {
-        ...getDefaultProf(profId),
+        ...getDefaultProf(profId, authorId),
         ...input,
     }
     await profs.doc(profId).set(prof)
     return prof
 }
-export const addProfFromTemplate = async (templateProfId: string, input: Partial<Prof>): Promise<Prof> => {
+export const addProfFromTemplate = async (templateProfId: string, input: Partial<Prof>, authorId: string | null): Promise<Prof> => {
     const profId = uuidv4()
     const templateProf = await getProf(templateProfId)
-    const defaultProf = getDefaultProf(profId)
+    const defaultProf = getDefaultProf(profId, authorId)
     const prof: Prof = {
         ...defaultProf,
         ...templateProf,

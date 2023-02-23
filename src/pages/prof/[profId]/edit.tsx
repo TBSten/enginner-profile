@@ -32,6 +32,8 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
     useEffect(() => {
         const saveData = getLocal(LOCAL_PROF_KEY)
         if (saveData === null) { return }
+        console.log(saveData);
+
         const savedProf = ProfSchema.parse(saveData)
         if (savedProf.profId === defaultProf.profId) {
             setProf(savedProf)

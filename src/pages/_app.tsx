@@ -4,19 +4,27 @@ import { theme } from '@/styles/theme';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import type { AppProps } from 'next/app';
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { SessionProvider } from "next-auth/react";
 import "prismjs/themes/prism-tomorrow.min.css";
 import { useEffect } from 'react';
 
-export default function App({ Component, pageProps: { ...pageProps } }: AppProps) {
-  const { hideDialog } = useGlobalDialog()
+const queryClient = new QueryClient()
+
+export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
+  const { resetDialog } = useGlobalDialog()
   useEffect(() => {
-    hideDialog()
+    resetDialog()
   })
   return <>
-    <ThemeProvider theme={theme}>
-      <GlobalDialog />
-      <CssBaseline />
-      <Component {...pageProps} />
-    </ThemeProvider>
+    <SessionProvider session={session}>
+      <ThemeProvider theme={theme}>
+        <QueryClientProvider client={queryClient}>
+          <GlobalDialog />
+          <CssBaseline />
+          <Component {...pageProps} />
+        </QueryClientProvider>
+      </ThemeProvider>
+    </SessionProvider>
   </>
 }

@@ -1,35 +1,42 @@
-import { ProfSchema } from "@/types";
+import { useGlobalDialog } from "@/lib/client/dialog";
+import { getUser } from "@/lib/server/user";
+import { ProfSchema, User } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Button, Container, Dialog, DialogContent, InputBase, Stack } from '@mui/material';
-import { NextPage } from 'next';
+import { Box, Button, Container, InputBase, Stack } from '@mui/material';
+import { GetServerSideProps, NextPage } from 'next';
+import { getServerSession } from "next-auth";
 import { useRouter } from "next/router";
-import { useState } from "react";
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { authOptions } from "../api/auth/[...nextauth]";
 
 const FormSchema = z.object({
     name: z.string().min(3),
 })
 
 interface Props {
+    user: User | null
 }
-const NewProfPage: NextPage<Props> = ({ }) => {
+const NewProfPage: NextPage<Props> = ({ user }) => {
     const { register, handleSubmit, formState: { errors, isValid, isSubmitting } } = useForm<z.infer<typeof FormSchema>>({
-        resolver: zodResolver(FormSchema)
+        resolver: zodResolver(FormSchema),
+        defaultValues: {
+            name: user?.name ?? "",
+        },
     })
     const router = useRouter()
     const onNewProf = handleSubmit(async (data) => {
-        setDialogContent("プロフを新規作成中...")
+        showDialog("プロフを新規作成中...", { canClose: false })
         const res = await fetch(`/api/prof/`, {
             method: "POST",
             body: JSON.stringify(data),
         }).then(r => r.json())
         const newProf = ProfSchema.parse(res)
-        setDialogContent("プロフ編集画面に移動中")
+        showDialog("プロフ編集画面に移動中", { canClose: false })
         router.push(`/prof/${newProf.profId}/edit`)
     })
 
-    const [dialogContent, setDialogContent] = useState<null | string>(null)
+    const { showDialog } = useGlobalDialog()
     return (
         <>
             <Box bgcolor={t => t.palette.grey[200]} width="100%" height="100%">
@@ -59,12 +66,17 @@ const NewProfPage: NextPage<Props> = ({ }) => {
                     </Container>
                 </Stack>
             </Box>
-            <Dialog open={dialogContent !== null} onClose={() => setDialogContent(null)}>
-                <DialogContent>
-                    {dialogContent}
-                </DialogContent>
-            </Dialog>
         </>
     );
 }
 export default NewProfPage;
+
+export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+    const session = await getServerSession(ctx.req, ctx.res, authOptions)
+    const user = session && await getUser(session.user.userId)
+    return {
+        props: {
+            user,
+        }
+    }
+}

@@ -20,9 +20,13 @@ export function useGlobalDialog() {
         if (!canClose) return
         setDialogContent(null)
     }, [canClose, setDialogContent])
+    const resetDialog = useCallback(() => {
+        setDialogContent(null)
+    }, [setDialogContent])
     return {
         showDialog,
         hideDialog,
+        resetDialog,
     } as const
 }
 

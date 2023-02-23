@@ -95,9 +95,6 @@ const Skills: FC<SkillsProps> = ({ prof }) => {
                 <Box component="h2" m={0} p={0}>
                     SKILL
                 </Box>
-                <Box>
-                    {prof.skillComment}
-                </Box>
                 <Box p={1}>
                     <Grid container spacing={1}>
                         {skills.map((skill, i) =>
@@ -190,9 +187,6 @@ const ProfItems: FC<ProfItemsProps> = ({ prof }) => {
                     <ProfItemView profItem={item} theme={prof.theme} key={item.name} />
                 )}
             </Box>
-            <Center p={1} fontSize="0.8em">
-                {prof.profItemComment}
-            </Center>
         </Stack>
     );
 }

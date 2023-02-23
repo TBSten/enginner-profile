@@ -95,6 +95,9 @@ const Skills: FC<SkillsProps> = ({ prof }) => {
                 <Box component="h2" m={0} p={0}>
                     SKILL
                 </Box>
+                <Box>
+                    {prof.skillComment}
+                </Box>
                 <Box p={1}>
                     <Grid container spacing={1}>
                         {skills.map((skill, i) =>
@@ -172,21 +175,25 @@ interface ProfItemsProps {
 }
 const ProfItems: FC<ProfItemsProps> = ({ prof }) => {
     const items = prof.profItems
-    const muiTheme = useTheme()
     return (
-        <Box
-            width="100%"
-            overflow="auto"
-            p={1}
-            display="flex"
-            flexDirection="row"
-            flexWrap="wrap"
-            justifyContent="center"
-        >
-            {items.map(item =>
-                <ProfItemView profItem={item} theme={prof.theme} key={item.name} />
-            )}
-        </Box>
+        <Stack direction="column">
+            <Box
+                width="100%"
+                overflow="auto"
+                p={1}
+                display="flex"
+                flexDirection="row"
+                flexWrap="wrap"
+                justifyContent="center"
+            >
+                {items.map(item =>
+                    <ProfItemView profItem={item} theme={prof.theme} key={item.name} />
+                )}
+            </Box>
+            <Center p={1} fontSize="0.8em">
+                {prof.profItemComment}
+            </Center>
+        </Stack>
     );
 }
 

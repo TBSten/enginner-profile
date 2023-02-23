@@ -12,7 +12,7 @@ import { getLocal, saveLocal } from '@/lib/client/saveLocal';
 import { getProf } from '@/lib/server/prof';
 import { Assessment, Prof, ProfItem, ProfItemValue, ProfSchema, Skill, ThemeType } from '@/types';
 import { Add, ContentCopy, Delete, Edit, KeyboardArrowUp, KeyboardDoubleArrowDown, KeyboardDoubleArrowUp, MoreVert, Save } from '@mui/icons-material';
-import { Alert, Box, Button, CircularProgress, Container, Divider, Fab, Grid, IconButton, InputBase, ListItemIcon, Menu, MenuItem, Select, SelectProps, Snackbar, Stack, Switch, Tooltip, useTheme } from '@mui/material';
+import { Alert, Box, Button, CircularProgress, Container, Divider, Fab, Grid, IconButton, InputBase, ListItemIcon, Menu, MenuItem, Select, SelectProps, Snackbar, Stack, Switch, TextField, Tooltip, useTheme } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -64,6 +64,10 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
         useCallback((type: ThemeType) => setProf(p => ({ ...p, theme: { ...p.theme, type } })), [])
     const handleChangeSkills: SkillsSectionProps["onChangeSkills"] =
         useCallback(updater => setProf(p => ({ ...p, skills: updater(p.skills) })), [])
+    const handleChangeSkillComment =
+        useCallback((skillComment: string) => setProf(p => ({ ...p, skillComment })), [])
+    const handleChangeProfItemComment =
+        useCallback((profItemComment: string) => setProf(p => ({ ...p, profItemComment })), [])
     const handleChangeProfItems: ProfItemsSectionProps["onChangeProfItems"] =
         useCallback(updater => setProf(p => ({ ...p, profItems: updater(p.profItems) })), [])
     const handleChangePublich: OutputSectionProps["onChangePublish"] =
@@ -90,11 +94,15 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
                 />
                 <SillsSection
                     skills={prof.skills}
+                    skillComment={prof.skillComment}
                     onChangeSkills={handleChangeSkills}
+                    onChangeSkillComment={handleChangeSkillComment}
                 />
                 <ProfItemsSection
                     profItems={prof.profItems}
+                    profItemComment={prof.profItemComment}
                     onChangeProfItems={handleChangeProfItems}
+                    onChangeProfItemComment={handleChangeProfItemComment}
                 />
                 <Divider />
                 <OutputSection
@@ -275,9 +283,11 @@ const defaultSkill = (): Skill => ({
 })
 interface SkillsSectionProps {
     skills: Skill[]
+    skillComment: string
     onChangeSkills: (updater: ((p: Skill[]) => Skill[])) => void
+    onChangeSkillComment: (comment: string) => void
 }
-const SillsSection: FC<SkillsSectionProps> = React.memo(function SillsSection({ skills, onChangeSkills }) {
+const SillsSection: FC<SkillsSectionProps> = React.memo(function SillsSection({ skills, skillComment, onChangeSkills, onChangeSkillComment }) {
     const handleChangeName = (idx: number) => (newName: string) => {
         onChangeSkills(p => {
             const newSkills = [...p];
@@ -355,6 +365,15 @@ const SillsSection: FC<SkillsSectionProps> = React.memo(function SillsSection({ 
                     {skills.length}個のスキル
                 </Box>
             </Stack>
+            <Box>
+                <TextField
+                    value={skillComment} onChange={e => onChangeSkillComment(e.target.value)}
+                    placeholder='スキルの説明を入力してください'
+                    multiline rows={3}
+                    fullWidth
+                    color="primary"
+                />
+            </Box>
             {skills.map((skill, idx) => <Box key={idx} py={0.5}>
                 <EditableSkill
                     skill={skill}
@@ -524,8 +543,10 @@ const defaultProfItem = (): ProfItem => ({
 interface ProfItemsSectionProps {
     profItems: ProfItem[]
     onChangeProfItems: (updater: ((p: ProfItem[]) => ProfItem[])) => void
+    profItemComment: string
+    onChangeProfItemComment: (comment: string) => void
 }
-const ProfItemsSection: FC<ProfItemsSectionProps> = React.memo(function ProfItemsSection({ profItems, onChangeProfItems }) {
+const ProfItemsSection: FC<ProfItemsSectionProps> = React.memo(function ProfItemsSection({ profItems, onChangeProfItems, profItemComment, onChangeProfItemComment }) {
     const handleAddProfItem = () => {
         onChangeProfItems(p => [...p, defaultProfItem()]);
     };
@@ -604,6 +625,15 @@ const ProfItemsSection: FC<ProfItemsSectionProps> = React.memo(function ProfItem
                     {profItems.length}個の項目
                 </Box>
             </Stack>
+            <Box>
+                <TextField
+                    value={profItemComment} onChange={e => onChangeProfItemComment(e.target.value)}
+                    placeholder='自己紹介 項目 の説明を入力してください'
+                    multiline rows={3}
+                    fullWidth
+                    color="secondary"
+                />
+            </Box>
             {profItems.map((profItem, idx) => <Box key={idx} py={0.5}>
                 <EditableProfItem
                     profItem={profItem}

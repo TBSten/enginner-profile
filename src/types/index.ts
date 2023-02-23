@@ -49,7 +49,9 @@ export const ProfSchema = z.object({
     icon: z.string(),
     freeSpace: z.string(),
     skills: z.array(SkillSchema),
+    skillComment: z.string(),
     profItems: z.array(ProfItemSchema),
+    profItemComment: z.string(),
     theme: z.object({
         type: ThemeTypeSchema,
         color: z.string(),

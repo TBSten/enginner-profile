@@ -57,7 +57,7 @@ const NewProfPage: NextPage<Props> = ({ user }) => {
                             <InputBase
                                 fullWidth
                                 inputProps={{
-                                    placeholder: "名前を入力してください",
+                                    placeholder: "名前を入力してください(必須)",
                                     style: {
                                         fontSize: "2rem",
                                         textAlign: "center",

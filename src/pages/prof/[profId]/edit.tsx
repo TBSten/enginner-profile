@@ -265,14 +265,14 @@ const OverviewSection: FC<OverviewProps> = ({ name, freeSpace, icon, onChangeNam
                         value={name}
                         onChange={e => onChangeName(e.target.value)}
                         fullWidth sx={{ fontSize: "3rem" }}
-                        placeholder='あなたの名前'
+                        placeholder='あなたの名前 (必須)'
                     />
                     <Divider />
                     <Box px={1}>
                         <InputBase
                             value={freeSpace}
                             onChange={e => onChangeFreeSpace(e.target.value)}
-                            placeholder='自由入力欄'
+                            placeholder='自由入力欄 (任意)'
                             fullWidth
                             minRows={5} maxRows={10} multiline
                         />
@@ -435,7 +435,7 @@ const SkillsSection: FC<SkillsSectionProps> = React.memo(function SillsSection({
                     <Stack>
                         <TextField
                             value={skillComment} onChange={e => onChangeSkillComment(e.target.value)}
-                            placeholder='スキルの説明を入力してください'
+                            placeholder='スキルの説明を入力してください (任意)'
                             multiline rows={3}
                             fullWidth
                             color="primary"
@@ -533,7 +533,7 @@ const EditableSkill: FC<EditableSkillProps> = React.memo(function EditableSkill(
                         value={skill.name}
                         onChange={e => onChangeName(e.target.value)}
                         fullWidth
-                        placeholder='スキル名を入力'
+                        placeholder='スキル名を入力 (必須)'
                         sx={{ fontWeight: "bold" }}
                     />
                 </Grid>
@@ -559,7 +559,7 @@ const EditableSkill: FC<EditableSkillProps> = React.memo(function EditableSkill(
                         label="コメントを入力"
                         value={skill.comment}
                         onChange={e => onChangeComment(e.target.value)}
-                        placeholder='コメントを入力'
+                        placeholder='コメントを入力 (任意)'
                         multiline rows={3}
                     />
                 </Grid>
@@ -723,7 +723,7 @@ const ProfItemsSection: FC<ProfItemsSectionProps> = React.memo(function ProfItem
                     <>
                         <TextField
                             value={profItemComment} onChange={e => onChangeProfItemComment(e.target.value)}
-                            placeholder='自己紹介 項目 の説明を入力してください'
+                            placeholder='自己紹介 項目 の説明を入力してください (任意)'
                             multiline rows={3}
                             fullWidth
                             color="secondary"
@@ -812,7 +812,7 @@ const EditableProfItem: FC<EditableProfItemProps> = React.memo(function Editable
                     <InputBase
                         value={profItem.name}
                         onChange={e => onChangeName(e.target.value)}
-                        placeholder='項目名を入力'
+                        placeholder='項目名を入力 (必須)'
                         fullWidth
                         sx={{ fontWeight: "bold", display: "inline" }}
                     />
@@ -833,7 +833,7 @@ const EditableProfItem: FC<EditableProfItemProps> = React.memo(function Editable
                         label="コメントを入力"
                         value={profItem.comment}
                         onChange={e => onChangeComment(e.target.value)}
-                        placeholder='コメントを入力'
+                        placeholder='コメントを入力 (任意)'
                         multiline rows={3}
                     />
                 </Grid>
@@ -903,7 +903,7 @@ const ProfItemValueEdit: FC<ProfItemValueEditProps> = ({ name, value, onChange }
                     <InputBase
                         value={value.text}
                         onChange={e => onChange({ type: "text", text: e.target.value })}
-                        placeholder={name + "を入力"}
+                        placeholder={name + "を入力 (必須)"}
                         fullWidth
                     />
                 }
@@ -916,7 +916,7 @@ const ProfItemValueEdit: FC<ProfItemValueEditProps> = ({ name, value, onChange }
                             <InputBase
                                 value={value.link}
                                 onChange={e => onChange({ type: "link", link: e.target.value })}
-                                placeholder={name + 'のリンクを入力'}
+                                placeholder={name + 'のリンクを入力 (必須)'}
                                 fullWidth
                             />
 

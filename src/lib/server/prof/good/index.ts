@@ -19,6 +19,6 @@ export const getGoodCount = async (profId: string, senderId: string | null = nul
         const snapshot = await goods(profId).doc(senderId).get()
         return snapshot.exists ? 1 : 0
     }
-    const { data: count } = await goods(profId).count().get()
-    return count
+    const snapshot = await goods(profId).count().get()
+    return snapshot.data().count
 }

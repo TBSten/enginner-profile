@@ -1,3 +1,4 @@
+import { useSession } from "@/lib/client/auth";
 import { useGlobalDialog } from "@/lib/client/dialog";
 import { getUser } from "@/lib/server/user";
 import { ProfSchema, User } from "@/types";
@@ -5,7 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Container, InputBase, Stack } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 import { getServerSession } from "next-auth";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { authOptions } from "../api/auth/[...nextauth]";
@@ -35,6 +38,12 @@ const NewProfPage: NextPage<Props> = ({ user }) => {
         showDialog("プロフ編集画面に移動中", { canClose: false })
         router.push(`/prof/${newProf.profId}/edit`)
     })
+    const { status, data: session } = useSession()
+    useEffect(() => {
+        if (status === "unauthenticated") {
+            signIn("anonymous", { redirect: false, })
+        }
+    }, [status])
 
     const { showDialog } = useGlobalDialog()
     return (

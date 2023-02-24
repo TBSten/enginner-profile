@@ -11,20 +11,21 @@ import { copyToClipboard } from '@/lib/client/copy';
 import { chooseFile } from '@/lib/client/file';
 import { useLoading } from '@/lib/client/loading';
 import { useResponsive } from '@/lib/client/responsive';
-import { getLocal, saveLocal } from '@/lib/client/saveLocal';
+import { LOCAL_PROF_KEY, getLocal, saveLocal } from '@/lib/client/saveLocal';
 import { getProf } from '@/lib/server/prof';
+import { tokenToUserId } from '@/lib/server/user/token';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { Assessment, Prof, ProfItem, ProfItemValue, ProfSchema, Skill, ThemeType } from '@/types';
 import { Add, ContentCopy, Delete, Edit, KeyboardArrowUp, KeyboardDoubleArrowDown, KeyboardDoubleArrowUp, MoreVert, Save } from '@mui/icons-material';
 import { Alert, Box, Button, CircularProgress, Container, Divider, Fab, Grid, IconButton, InputBase, ListItemIcon, Menu, MenuItem, Popover, Select, SelectProps, Snackbar, Stack, Switch, TextField, Tooltip, useTheme } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
+import { getServerSession } from 'next-auth';
 import Head from 'next/head';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { FC, MouseEventHandler, ReactNode, useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { TwitterIcon, TwitterShareButton } from 'react-share';
 import { z } from 'zod';
-
-const LOCAL_PROF_KEY = "enginner_profile_local_prof"
 
 interface Props {
     prof: Prof
@@ -35,7 +36,6 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
     useEffect(() => {
         const saveData = getLocal(LOCAL_PROF_KEY)
         if (saveData === null) { return }
-        console.log(saveData);
 
         const savedProf = ProfSchema.parse(saveData)
         if (savedProf.profId === defaultProf.profId) {
@@ -137,10 +137,22 @@ export default ProfDetailPage;
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     try {
+        const session = await getServerSession(ctx.req, ctx.res, authOptions)
         const id = ctx.query.profId as string
         const prof = await getProf(id)
         if (prof === null) {
             return { notFound: true }
+        }
+        const userId = session?.user.userId
+            ?? await tokenToUserId(ctx.req.cookies._enginner_prof_user_token ?? "invalid token")
+        // ログインしたユーザのプロフ
+        const hasEditPermissions = prof.authorId !== userId
+        if (hasEditPermissions) {
+            // 編集する権限がない
+            console.warn("the user not have permission to edit", "prof", prof, "access user", session?.user)
+            return {
+                notFound: true,
+            }
         }
         return {
             props: {

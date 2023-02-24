@@ -1,6 +1,6 @@
 import { UserSchema } from "@/types";
 import { useQuery } from "@tanstack/react-query";
-import { useSession } from "next-auth/react";
+import { useSession } from "./auth";
 
 export function useSessionUser() {
     const { data: session, status } = useSession()

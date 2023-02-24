@@ -5,17 +5,17 @@ import { db } from "../firestore";
 
 export const profs = db.collection("profs")
 
-const getDefaultProf = (profId: string, authorId: string | null): Prof => ({
+const getDefaultProf = (profId: string, authorId: string): Prof => ({
     profId,
     version: "1.0",
     authorId,
     name: "あなたの名前",
     freeSpace: "",
-    icon: "https://storage.googleapis.com/enginner-prof-user-images/default-icon-1",
+    icon: "https://storage.googleapis.com/enginner-prof-user-images/defaults/default-1",
     skills: [],
-    skillComment: "",
+    skillComment: null,
     profItems: [],
-    profItemComment: "",
+    profItemComment: null,
     publish: false,
     createAt: Date.now(),
     updateAt: Date.now(),
@@ -26,7 +26,7 @@ const getDefaultProf = (profId: string, authorId: string | null): Prof => ({
     publishAt: null,
 })
 
-export const addNewProf = async (input: Partial<Prof>, authorId: string | null): Promise<Prof> => {
+export const addNewProf = async (input: Partial<Prof>, authorId: string): Promise<Prof> => {
     const profId = uuidv4()
     const prof: Prof = {
         ...getDefaultProf(profId, authorId),
@@ -35,7 +35,7 @@ export const addNewProf = async (input: Partial<Prof>, authorId: string | null):
     await profs.doc(profId).set(prof)
     return prof
 }
-export const addProfFromTemplate = async (templateProfId: string, input: Partial<Prof>, authorId: string | null): Promise<Prof> => {
+export const addProfFromTemplate = async (templateProfId: string, input: Partial<Prof>, authorId: string): Promise<Prof> => {
     const profId = uuidv4()
     const templateProf = await getProf(templateProfId)
     const defaultProf = getDefaultProf(profId, authorId)
@@ -47,6 +47,7 @@ export const addProfFromTemplate = async (templateProfId: string, input: Partial
         name: defaultProf.name,
         // 残りは入力をもとに上書き
         ...input,
+        authorId,
     }
     await profs.doc(profId).set(prof)
     return prof

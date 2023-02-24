@@ -10,3 +10,5 @@ export const getLocal = (key: string): unknown | null => {
     const value = JSON.parse(data)
     return value
 }
+
+export const LOCAL_PROF_KEY = "enginner_profile_local_prof"

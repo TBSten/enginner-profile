@@ -1,20 +1,22 @@
 import Center from '@/components/Center';
+import Right from '@/components/Right';
 import SeoHead from '@/components/Seo';
 import BaseLayout from '@/components/layout/BaseLayout';
 import LayoutContent from '@/components/layout/LayoutContent';
 import { themeTypeToComponent } from '@/components/prof';
+import { useSession } from '@/lib/client/auth';
 import { copyToClipboard } from '@/lib/client/copy';
 import { useGlobalDialog } from '@/lib/client/dialog';
+import { useSignInAsAnonymous } from '@/lib/client/useSignInAsAnonymous';
 import { getProf } from '@/lib/server/prof';
 import { getGoodCount } from '@/lib/server/prof/good';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { theme as baseTheme } from "@/styles/theme";
 import { Prof, ProfSchema } from '@/types';
-import { ContentCopy, Favorite, FavoriteBorder, FiberNew } from '@mui/icons-material';
+import { ContentCopy, Edit, Favorite, FavoriteBorder, FiberNew } from '@mui/icons-material';
 import { Box, Button, IconButton, Stack, ThemeProvider, Tooltip, createTheme } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 import { getServerSession } from 'next-auth';
-import { useSession } from 'next-auth/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { FC, useEffect, useMemo, useReducer, useState } from 'react';
@@ -23,8 +25,9 @@ import { TwitterIcon, TwitterShareButton } from 'react-share';
 interface Props {
     prof: Prof
     sentGood: boolean
+    goodCount: number
 }
-const ProfViewPage: NextPage<Props> = ({ prof, sentGood }) => {
+const ProfViewPage: NextPage<Props> = ({ prof, sentGood, goodCount }) => {
     const ProfViewComponent = themeTypeToComponent(prof.theme.type)
     const router = useRouter()
     const { showDialog } = useGlobalDialog()
@@ -55,6 +58,8 @@ const ProfViewPage: NextPage<Props> = ({ prof, sentGood }) => {
         })
         return theme
     }, [prof.theme.color])
+    useSignInAsAnonymous()
+
     return (
         <>
             <ThemeProvider theme={theme}>
@@ -63,6 +68,7 @@ const ProfViewPage: NextPage<Props> = ({ prof, sentGood }) => {
                     <HeaderSection
                         prof={prof}
                         sentGood={sentGood}
+                        goodCount={goodCount}
                     />
                     <LayoutContent>
                         <ProfViewComponent
@@ -108,8 +114,9 @@ const ProfViewHead: FC<ProfViewHeadProps> = ({ prof }) => {
 interface HeaderSectionProps {
     prof: Prof
     sentGood: boolean
+    goodCount: number
 }
-const HeaderSection: FC<HeaderSectionProps> = ({ prof, sentGood: defaultSentGood }) => {
+const HeaderSection: FC<HeaderSectionProps> = ({ prof, sentGood: defaultSentGood, goodCount }) => {
     const [loc, initLoc] = useReducer<() => Location | null>(() => location, null)
     useEffect(() => initLoc(), [])
     const profUrl = `${loc?.origin}/prof/${prof.profId}`
@@ -119,6 +126,7 @@ const HeaderSection: FC<HeaderSectionProps> = ({ prof, sentGood: defaultSentGood
     }
     const { data: session, status } = useSession()
     const [sentGood, setSentGood] = useState(defaultSentGood)
+    const isAuthor = session?.user.userId === prof.authorId
     const handleGood = async () => {
         if (sentGood) {
             setSentGood(false)
@@ -141,52 +149,69 @@ const HeaderSection: FC<HeaderSectionProps> = ({ prof, sentGood: defaultSentGood
         }
     }
     return (
-        <LayoutContent>
-            <Stack
-                p={2}
-                direction={{ xs: "column", md: "row" }}
-                justifyContent="space-between"
-                borderRadius="1rem"
-                overflow="auto"
-                bgcolor="background.paper"
-            >
-                <Center>
-                    {prof.name} さんのプロフィール
-                </Center>
-                <Stack direction="row" justifyContent="flex-end" alignItems="center" spacing={1}>
-                    {prof.publish &&
-                        <>
-                            <Tooltip title="Twitterでシェア">
-                                <Center>
-                                    <TwitterShareButton
-                                        url={`${loc?.origin}/prof/${prof.profId}`}
-                                        hashtags={["エンジニアプロフ"]}
-                                        title={`${prof.name} のプロフ \n\n`}
-                                        style={{ display: "flex", justifyContent: "center", alignItems: "center" }}
-                                    >
-                                        <TwitterIcon size={32} round />
-                                    </TwitterShareButton>
-                                </Center>
-                            </Tooltip>
-                            <Tooltip title="URLをコピー">
-                                <Center>
-                                    <IconButton onClick={handleCopy}>
-                                        <ContentCopy />
-                                    </IconButton>
-                                </Center>
-                            </Tooltip>
-                        </>
-                    }
-                    <IconButton onClick={handleGood} disabled={status !== "authenticated"}>
-                        {sentGood
-                            ? <Favorite color='primary' />
-                            : <FavoriteBorder />
+        <>
+            <LayoutContent>
+                <Stack
+                    p={2}
+                    direction={{ xs: "column", md: "row" }}
+                    justifyContent="space-between"
+                    borderRadius="1rem"
+                    overflow="auto"
+                    bgcolor="background.paper"
+                >
+                    <Center>
+                        {prof.name} さんのプロフィール
+                    </Center>
+                    <Stack direction="row" justifyContent="flex-end" alignItems="center" spacing={1}>
+                        {prof.publish &&
+                            <>
+                                <Tooltip title="Twitterでシェア">
+                                    <Center>
+                                        <TwitterShareButton
+                                            url={`${loc?.origin}/prof/${prof.profId}`}
+                                            hashtags={["エンジニアプロフ"]}
+                                            title={`${prof.name} のプロフ \n\n`}
+                                            style={{ display: "flex", justifyContent: "center", alignItems: "center" }}
+                                        >
+                                            <TwitterIcon size={32} round />
+                                        </TwitterShareButton>
+                                    </Center>
+                                </Tooltip>
+                                <Tooltip title="URLをコピー">
+                                    <Center>
+                                        <IconButton onClick={handleCopy}>
+                                            <ContentCopy />
+                                        </IconButton>
+                                    </Center>
+                                </Tooltip>
+                            </>
                         }
-
-                    </IconButton>
+                        <Tooltip title={status !== "authenticated" ? "ログインするとGoodできます" : ""}>
+                            <Stack direction="column">
+                                <IconButton onClick={handleGood} disabled={status !== "authenticated"}>
+                                    {sentGood
+                                        ? <Favorite color='primary' />
+                                        : <FavoriteBorder />
+                                    }
+                                </IconButton>
+                                <Center>
+                                    {goodCount + (!defaultSentGood && sentGood ? +1 : defaultSentGood && !sentGood ? -1 : 0)}
+                                </Center>
+                            </Stack>
+                        </Tooltip>
+                    </Stack>
                 </Stack>
-            </Stack>
-        </LayoutContent>
+            </LayoutContent>
+            {isAuthor &&
+                <LayoutContent>
+                    <Right bgcolor="background.paper" p={2} borderRadius="1rem">
+                        <Button variant='outlined' startIcon={<Edit />} href={`/prof/${prof.profId}/edit`}>
+                            編集する
+                        </Button>
+                    </Right>
+                </LayoutContent>
+            }
+        </>
     );
 }
 
@@ -242,10 +267,12 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
             (session !== null &&
                 (await getGoodCount(profId, session.user.userId)) === 1
             )
+        const goodCount = await getGoodCount(profId)
         return {
             props: {
                 prof,
                 sentGood,
+                goodCount,
             }
         }
     } catch (e) {

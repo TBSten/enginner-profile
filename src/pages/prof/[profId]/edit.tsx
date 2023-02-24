@@ -17,7 +17,7 @@ import { tokenToUserId } from '@/lib/server/user/token';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { Assessment, Prof, ProfItem, ProfItemValue, ProfSchema, Skill, ThemeType } from '@/types';
 import { Add, ContentCopy, Delete, Edit, KeyboardArrowUp, KeyboardDoubleArrowDown, KeyboardDoubleArrowUp, MoreVert, Save } from '@mui/icons-material';
-import { Alert, Box, Button, CircularProgress, Container, Divider, Fab, Grid, IconButton, InputBase, ListItemIcon, Menu, MenuItem, Popover, Select, SelectProps, Snackbar, Stack, Switch, TextField, Tooltip, useTheme } from '@mui/material';
+import { Alert, Box, Button, CircularProgress, Container, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Fab, Grid, IconButton, InputBase, ListItemIcon, Menu, MenuItem, Popover, Slider, Snackbar, Stack, Switch, TextField, Tooltip, useTheme } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 import { getServerSession } from 'next-auth';
 import Head from 'next/head';
@@ -477,11 +477,23 @@ const SkillsSection: FC<SkillsSectionProps> = React.memo(function SillsSection({
     );
 })
 
-const assessments: Assessment["comment"][] = [
-    "わからない/知らない",
-    "助けがあればできる",
-    "ひとりでできる",
-    "人に教えられる",
+const assessments: Assessment[] = [
+    {
+        value: 0 / 3,
+        comment: "わからない/知らない",
+    },
+    {
+        value: 1 / 3,
+        comment: "助けがあればできる",
+    },
+    {
+        value: 2 / 3,
+        comment: "ひとりでできる",
+    },
+    {
+        value: 3 / 3,
+        comment: "人に教えられる",
+    },
 ]
 
 interface EditableSkillProps {
@@ -501,13 +513,9 @@ const EditableSkill: FC<EditableSkillProps> = React.memo(function EditableSkill(
 }) {
     const [openMenu, setOpenMenu] = useState(false);
     const btnRef = useRef<HTMLButtonElement>(null);
-    const handleChangeAssessment: SelectProps<number>["onChange"] = (e) => {
-        const value = e.target.value as number;
-        onChangeAssessment({
-            value,
-            comment: assessments[value],
-        });
-    };
+    const handleChangeAssessment = (assessment: Assessment) => {
+        onChangeAssessment(assessment)
+    }
     const handleMoveToUp = () => {
         setOpenMenu(false)
         onMoveToUp()
@@ -538,20 +546,17 @@ const EditableSkill: FC<EditableSkillProps> = React.memo(function EditableSkill(
                     />
                 </Grid>
                 <Grid item xs="auto" px={1}>
-                    <Select
-                        variant='standard'
-                        value={skill.assessment.value}
+                    {/* TODO select or open dialog component here */}
+                    {/*  */}
+                    {/*  */}
+                    <AssessmentInput
+                        assessment={skill.assessment}
                         onChange={handleChangeAssessment}
-                        fullWidth
-                    >
-                        {assessments.map((assessment, idx) => <MenuItem key={assessment} value={idx}>
-                            {"⭐️".repeat(idx + 1)}
-                            {"☆".repeat(4 - idx - 1)}
-                            {" "}
-                            {assessment}
-                        </MenuItem>
-                        )}
-                    </Select>
+                        skillName={skill.name}
+                    />
+                    {/*  */}
+                    {/*  */}
+                    {/*  */}
                 </Grid>
                 <Grid item xs="auto" px={1}>
                     <TextEditButton
@@ -604,6 +609,95 @@ const EditableSkill: FC<EditableSkillProps> = React.memo(function EditableSkill(
         </Box>
     );
 })
+
+interface AssessmentInputProps {
+    skillName: string
+    assessment: Assessment
+    onChange: (assessment: Assessment) => void
+}
+const AssessmentInput: FC<AssessmentInputProps> = ({
+    assessment, onChange,
+    skillName,
+}) => {
+    const selectedAssessment = assessment
+    const menuAnchorRef = useRef<HTMLButtonElement>(null)
+    const [openMenu, setOpenMenu] = useState(false)
+    const handleSelectAssessment = (assessment: Assessment) => () => {
+        onChange(assessment)
+    }
+    const [openDialog, setOpenDialog] = useState(false)
+    const handleOpenDialog = () => {
+        setOpenDialog(true)
+    }
+    return (
+        <>
+            <Button variant="outlined" onClick={() => setOpenMenu(true)} ref={menuAnchorRef}>
+                {"⭐️".repeat(Math.floor(assessment.value * 3 + 1))}
+                {"☆".repeat(4 - Math.floor(assessment.value * 3 + 1))}
+                {" "}
+                {assessment.comment}
+            </Button>
+
+            <Menu open={openMenu} onClose={() => setOpenMenu(false)} anchorEl={menuAnchorRef.current}>
+                {assessments.map(assessment =>
+                    <MenuItem onClick={handleSelectAssessment(assessment)} selected={assessment === selectedAssessment} key={assessment.value}>
+                        {"⭐️".repeat(Math.floor(assessment.value * 3 + 1))}
+                        {"☆".repeat(4 - Math.floor(assessment.value * 3 + 1))}
+                        {" "}
+                        {assessment.comment}
+                    </MenuItem>
+                )}
+                <MenuItem onClick={handleOpenDialog} selected={!assessments.includes(selectedAssessment)}>
+                    <ListItemIcon>
+                        <Edit />
+                    </ListItemIcon>
+                    カスタム
+                </MenuItem>
+                <MenuItem onClick={() => setOpenMenu(false)}>
+                    閉じる
+                </MenuItem>
+            </Menu>
+
+            <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth>
+                <DialogTitle>
+                    {skillName}
+                </DialogTitle>
+                <DialogContent>
+                    <Box>
+                        スキルレベル : {Math.floor(assessment.value * 100)}
+                        {" "}
+                        {"⭐️".repeat(Math.floor(assessment.value * 3 + 1))}
+                        {"☆".repeat(4 - Math.floor(assessment.value * 3 + 1))}
+                    </Box>
+                    <Stack spacing={2} direction="row" sx={{ mb: 1 }} alignItems="center">
+                        <Slider
+                            value={assessment.value}
+                            min={0}
+                            step={0.01}
+                            max={1}
+                            onChange={(_, newValue) => onChange({ ...assessment, value: newValue as number })}
+                        />
+                    </Stack>
+                    <Box>コメント</Box>
+                    <Box py={2}>
+                        <TextField fullWidth
+                            value={assessment.comment}
+                            onChange={e => onChange({ ...assessment, comment: e.target.value })}
+                            placeholder='コメントを入力 (任意)'
+                        />
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant="contained" onClick={() => setOpenDialog(false)}>
+                        OK
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+        </>
+    );
+}
+
 
 const defaultProfItem = (): ProfItem => ({
     name: "趣味",

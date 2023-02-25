@@ -1093,7 +1093,7 @@ const OutputSection: FC<OutputSectionProps> = React.memo(function OutputSection(
                         href={`/prof/${profId}/card`}
                         onClick={onSave}
                     >
-                        カード形式で表示
+                        カード(画像)で表示
                     </Button>
                 </Stack>
 

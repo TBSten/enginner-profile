@@ -21,7 +21,7 @@ const DefaultImageSelector: FC<DefaultImageSelectorProps> = ({
     return (
         <Stack direction="row" spacing={1} width="100%" overflow="auto">
             {images.map(img =>
-                <Box key={img} onClick={() => { onChange(img); console.log("change") }}>
+                <Box key={img} onClick={() => onChange(img)}>
                     <Image
                         src={img}
                         alt="デフォルトの画像"

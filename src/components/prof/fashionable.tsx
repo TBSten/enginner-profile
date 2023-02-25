@@ -51,6 +51,7 @@ const Overview: FC<OverviewProps> = ({
                     alt={prof.name}
                     width={1200}
                     height={600}
+                    priority
                     style={{
                         width: "50%",
                         maxWidth: "40vh",

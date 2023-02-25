@@ -5,10 +5,10 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import { v4 as uuidv4 } from "uuid"
 
-const CLIENT_ID = process.env.GCP_OAUTH_CLIENT_ID
-const CLIENT_SECRET = process.env.GCP_OAUTH_CLIENT_SECRET
-if (typeof CLIENT_ID !== "string") throw new Error("invalid google oauth client id")
-if (typeof CLIENT_SECRET !== "string") throw new Error("invalid google oauth client secret")
+const CLIENT_ID = process.env.GCP_OAUTH_CLIENT_ID as string
+const CLIENT_SECRET = process.env.GCP_OAUTH_CLIENT_SECRET as string
+// if (typeof CLIENT_ID !== "string") throw new Error("invalid google oauth client id")
+// if (typeof CLIENT_SECRET !== "string") throw new Error("invalid google oauth client secret")
 
 console.log("OATH_CLIENT_ID", CLIENT_ID)
 console.log("OATH_CLIENT_SECRET", CLIENT_SECRET)

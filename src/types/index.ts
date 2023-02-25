@@ -48,6 +48,8 @@ export const ProfSchema = z.object({
     authorId: z.string(),
     icon: z.string(),
     freeSpace: z.string(),
+    slug: z.string().nullable(),
+    images: z.string().array(),
     skills: z.array(SkillSchema),
     skillComment: z.string().nullable(),
     profItems: z.array(ProfItemSchema),

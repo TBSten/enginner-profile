@@ -14,7 +14,7 @@ import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { theme as baseTheme } from "@/styles/theme";
 import { Prof, ProfSchema } from '@/types';
 import { ContentCopy, Edit, Favorite, FavoriteBorder, FiberNew } from '@mui/icons-material';
-import { Box, Button, IconButton, Stack, ThemeProvider, Tooltip, createTheme } from '@mui/material';
+import { Box, Button, Chip, IconButton, Stack, ThemeProvider, Tooltip, createTheme } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 import { getServerSession } from 'next-auth';
 import Head from 'next/head';
@@ -204,10 +204,20 @@ const HeaderSection: FC<HeaderSectionProps> = ({ prof, sentGood: defaultSentGood
             </LayoutContent>
             {isAuthor &&
                 <LayoutContent>
-                    <Right bgcolor="background.paper" p={2} borderRadius="1rem">
-                        <Button variant='outlined' startIcon={<Edit />} href={`/prof/${prof.profId}/edit`}>
-                            編集する
-                        </Button>
+                    <Stack direction="row" justifyContent="space-between" bgcolor="background.paper" p={2} borderRadius="1rem">
+                        <Box>
+                            {prof.publish
+                                ? <Chip color="primary" label="公開中" />
+                                : <Chip label="未公開" />
+                            }
+                        </Box>
+                        <Box>
+                            <Button variant='outlined' startIcon={<Edit />} href={`/prof/${prof.profId}/edit`}>
+                                編集する
+                            </Button>
+                        </Box>
+                    </Stack>
+                    <Right>
                     </Right>
                 </LayoutContent>
             }

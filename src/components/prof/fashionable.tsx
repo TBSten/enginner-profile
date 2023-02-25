@@ -13,6 +13,9 @@ const FashionableProfView: FC<FashionableProfViewProps> = ({ prof }) => {
             <ProfItems
                 prof={prof}
             />
+            <Images
+                prof={prof}
+            />
             <Divider />
             <Skills prof={prof} />
             <Divider />
@@ -241,4 +244,27 @@ const ProfItemView: FC<ProfItemViewProps> = ({ profItem, theme }) => {
             >{content}</Box>
         </Tooltip>
     )
+}
+
+interface ImagesProps {
+    prof: Prof
+}
+const Images: FC<ImagesProps> = ({ prof }) => {
+    return (
+        <Stack overflow="auto" width="100%" spacing={2} direction="row" flexWrap="nowrap" p={1}>
+            {prof.images.map(img =>
+                <Center key={img}>
+                    <Image
+                        key={img}
+                        src={img}
+                        alt=""
+                        width={150}
+                        height={150}
+                        style={{ width: "150px", height: "auto" }}
+                        priority
+                    />
+                </Center>
+            )}
+        </Stack>
+    );
 }

@@ -12,11 +12,12 @@ import { chooseFile } from '@/lib/client/file';
 import { useLoading } from '@/lib/client/loading';
 import { useResponsive } from '@/lib/client/responsive';
 import { LOCAL_PROF_KEY, getLocal, saveLocal } from '@/lib/client/saveLocal';
+import { upload } from '@/lib/client/upload';
 import { getProf } from '@/lib/server/prof';
 import { tokenToUserId } from '@/lib/server/user/token';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { Assessment, Prof, ProfItem, ProfItemValue, ProfSchema, Skill, ThemeType } from '@/types';
-import { Add, ContentCopy, Delete, Edit, KeyboardArrowUp, KeyboardDoubleArrowDown, KeyboardDoubleArrowUp, MoreVert, Save } from '@mui/icons-material';
+import { Add, Clear, ContentCopy, Delete, Edit, KeyboardArrowUp, KeyboardDoubleArrowDown, KeyboardDoubleArrowUp, MoreVert, Save } from '@mui/icons-material';
 import { Alert, Box, Button, CircularProgress, Container, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Fab, Grid, IconButton, InputBase, ListItemIcon, Menu, MenuItem, Popover, Slider, Snackbar, Stack, Switch, TextField, Tooltip, useTheme } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 import { getServerSession } from 'next-auth';
@@ -25,7 +26,6 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import React, { FC, MouseEventHandler, ReactNode, useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { TwitterIcon, TwitterShareButton } from 'react-share';
-import { z } from 'zod';
 
 interface Props {
     prof: Prof
@@ -75,6 +75,10 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
         useCallback(updater => setProf(p => ({ ...p, profItems: updater(p.profItems) })), [])
     const handleChangePublich: OutputSectionProps["onChangePublish"] =
         useCallback(publish => setProf(p => ({ ...p, publish })), [])
+    const handleChangeSlug: OverviewProps["onChangeSlug"] =
+        useCallback(slug => setProf(p => ({ ...p, slug })), [])
+    const handleChangeImages: OverviewProps["onChangeImages"] =
+        useCallback(updater => setProf(p => ({ ...p, images: updater(p.images) })), [])
 
     return (
         <>
@@ -84,9 +88,13 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
                     name={prof.name}
                     freeSpace={prof.freeSpace}
                     icon={prof.icon}
+                    images={prof.images}
+                    slug={prof.slug}
                     onChangeName={handleChangeName}
                     onChangeFreeSpace={handleChangeFreeSpace}
                     onChangeIcon={handleChangeIcon}
+                    onChangeSlug={handleChangeSlug}
+                    onChangeImages={handleChangeImages}
                 />
                 <Divider />
                 <ThemeEditSection
@@ -180,34 +188,43 @@ const ProfDetailHead: FC<ProfDetailHeadProps> = ({ prof }) => {
     );
 }
 
-const UploadUrlResSchema = z.object({
-    publicUrl: z.string(),
-    uploadUrl: z.string(),
-})
 interface OverviewProps {
     name: string
     freeSpace: string
     icon: string
+    images: string[]
+    slug: string | null
     onChangeName: (name: string) => void
     onChangeFreeSpace: (freeSpace: string) => void
     onChangeIcon: (icon: string) => void
+    onChangeImages: (updater: ((p: string[]) => string[])) => void
+    onChangeSlug: (slug: string | null) => void
 }
-const OverviewSection: FC<OverviewProps> = ({ name, freeSpace, icon, onChangeName, onChangeFreeSpace, onChangeIcon }) => {
+const OverviewSection: FC<OverviewProps> = ({
+    name, freeSpace, icon, slug, images,
+    onChangeName, onChangeFreeSpace, onChangeIcon, onChangeSlug, onChangeImages,
+}) => {
     const theme = useTheme()
-    const [isUploading, withUpload] = useLoading()
+    const [isUploadingIcon, withUploadIcon] = useLoading()
     const handleUploadIcon = async () => {
         const file = await chooseFile("image/*")
-
-        withUpload(async () => {
-            const res = await fetch(`/api/image/upload`).then(r => r.json())
-            const { uploadUrl, publicUrl } = UploadUrlResSchema.parse(res)
-            await fetch(uploadUrl, {
-                method: "PUT",
-                body: file,
-            })
+        withUploadIcon(async () => {
+            const { publicUrl } = await upload(file)
             onChangeIcon(publicUrl)
         })
     }
+    const [isUploadingImage, withUploadImage] = useLoading()
+    const handleUploadImage = async () => {
+        const file = await chooseFile("image/*")
+        withUploadImage(async () => {
+            const { publicUrl } = await upload(file)
+            onChangeImages(p => [...p, publicUrl])
+        })
+    }
+    const handleDeleteImage = (img: string) => () => {
+        onChangeImages(p => p.filter(i => i !== img))
+    }
+
 
     const iconSize = 100
     const imgRef = useRef<HTMLImageElement>(null)
@@ -219,7 +236,7 @@ const OverviewSection: FC<OverviewProps> = ({ name, freeSpace, icon, onChangeNam
                     <Stack direction="column" alignItems="center" onClick={() => setOpenImgPopover(true)}>
                         <Box borderRadius={2} overflow="hidden" width={iconSize} height={iconSize}>
                             <Box position="relative">
-                                {isUploading &&
+                                {isUploadingIcon &&
                                     <Center position="absolute" left={0} top={0} width="100%" height="100%" bgcolor="rgba(0,0,0,0.5)">
                                         <CircularProgress size={iconSize * 0.9} />
                                     </Center>
@@ -279,6 +296,37 @@ const OverviewSection: FC<OverviewProps> = ({ name, freeSpace, icon, onChangeNam
                     </Box>
                 </Grid>
             </Grid>
+            <Box>
+                画像 (テーマによっては表示されないことがあります)
+            </Box>
+            <Stack direction="row" width="100%" overflow="auto" px={2} py={1} spacing={1} alignItems="flex-start" flexWrap="nowrap">
+                {images.map(img =>
+                    <Box key={img} overflow="hidden" borderRadius="1rem" position="relative" minWidth="fit-content" minHeight="fit-content">
+                        <Image
+                            src={img}
+                            alt={img}
+                            width={300}
+                            height={200}
+                            style={{ width: 300, height: "auto" }}
+                        />
+                        <IconButton
+                            color="inherit"
+                            sx={{ position: "absolute", left: 0, top: 0 }}
+                            onClick={handleDeleteImage(img)}
+                        >
+                            <Clear />
+                        </IconButton>
+                    </Box>
+                )}
+                {isUploadingImage &&
+                    <CircularProgress />
+                }
+                <Center height="100%" px={4}>
+                    <Button variant='outlined' sx={{ aspectRatio: "1 / 1" }} onClick={handleUploadImage}>
+                        追加
+                    </Button>
+                </Center>
+            </Stack>
         </LayoutContent>
     );
 }
@@ -545,18 +593,12 @@ const EditableSkill: FC<EditableSkillProps> = React.memo(function EditableSkill(
                         sx={{ fontWeight: "bold" }}
                     />
                 </Grid>
-                <Grid item xs="auto" px={1}>
-                    {/* TODO select or open dialog component here */}
-                    {/*  */}
-                    {/*  */}
+                <Grid item xs={12} sm="auto" px={1}>
                     <AssessmentInput
                         assessment={skill.assessment}
                         onChange={handleChangeAssessment}
                         skillName={skill.name}
                     />
-                    {/*  */}
-                    {/*  */}
-                    {/*  */}
                 </Grid>
                 <Grid item xs="auto" px={1}>
                     <TextEditButton
@@ -631,7 +673,7 @@ const AssessmentInput: FC<AssessmentInputProps> = ({
     }
     return (
         <>
-            <Button variant="outlined" onClick={() => setOpenMenu(true)} ref={menuAnchorRef}>
+            <Button variant="outlined" fullWidth onClick={() => setOpenMenu(true)} ref={menuAnchorRef}>
                 {"⭐️".repeat(Math.floor(assessment.value * 3 + 1))}
                 {"☆".repeat(4 - Math.floor(assessment.value * 3 + 1))}
                 {" "}

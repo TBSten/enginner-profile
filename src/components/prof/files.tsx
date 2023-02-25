@@ -92,12 +92,14 @@ const profToViewData = (prof: Prof): ViewData => {
             if (item.value.type === "link") ans[item.name] = item.value.link
             return ans
         }, {} as Record<string, unknown>)
+    const images = prof.images
     const data = {
         name: prof.name,
         icon: prof.icon,
         details: prof.freeSpace,
         ...items,
         skills,
+        images,
     }
     return data
 }

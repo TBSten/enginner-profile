@@ -11,7 +11,9 @@ const getDefaultProf = (profId: string, authorId: string): Prof => ({
     authorId,
     name: "あなたの名前",
     freeSpace: "",
+    slug: profId,
     icon: "https://storage.googleapis.com/enginner-prof-user-images/defaults/default-1",
+    images: [],
     skills: [],
     skillComment: null,
     profItems: [],
@@ -53,10 +55,21 @@ export const addProfFromTemplate = async (templateProfId: string, input: Partial
     return prof
 }
 
-export const getProf = async (profId: string): Promise<Prof | null> => {
-    const snapshot = await profs.doc(profId).get()
-    if (!snapshot.exists) return null
+export const getProf = async (profIdOrSlug: string): Promise<Prof | null> => {
+    const snapshot = await profs.doc(profIdOrSlug).get()
+    if (!snapshot.exists) {
+        // slugで検索
+        return await getProfBySlug(profIdOrSlug)
+    }
     const prof = ProfSchema.parse(snapshot.data())
+    return prof
+}
+
+export const getProfBySlug = async (slug: string): Promise<Prof | null> => {
+    const snapshot = await profs.where("slug", "==", slug).get()
+    if (snapshot.docs.length !== 0) return null
+    if (snapshot.docs.length >= 2) throw new Error(`prof slug is duplicate : slug=${slug}`)
+    const prof = ProfSchema.parse(snapshot.docs[0])
     return prof
 }
 

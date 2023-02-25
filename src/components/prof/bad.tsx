@@ -12,7 +12,22 @@ const BadProfView: FC<BadProfViewProps> = ({ prof }) => {
                 alt={prof.name}
                 width={300}
                 height={300}
+                style={{ height: "auto" }}
+                priority
             />
+            <p>
+                {prof.images.map(img =>
+                    <Image
+                        key={img}
+                        src={img}
+                        alt=""
+                        width={100}
+                        height={100}
+                        style={{ height: "auto" }}
+                        priority
+                    />
+                )}
+            </p>
             <h1>{prof.name}</h1>
             <p>
                 {prof.freeSpace}

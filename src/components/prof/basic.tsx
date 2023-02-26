@@ -1,8 +1,9 @@
 import { Prof, ProfItem, Skill } from "@/types";
-import { Box, Button, Container, Divider, Grid, Link, Stack, Tooltip, alpha, useTheme } from "@mui/material";
+import { Box, Button, Container, DialogActions, DialogContent, DialogTitle, Divider, Grid, Stack, Tooltip, alpha, useTheme } from "@mui/material";
 import Image from "next/image";
 import { FC, useState } from "react";
 import Center from "../Center";
+import UtilDialog, { useUtilDialog } from "../UtilDialog";
 import { ProfViewComponentProps } from "./util";
 
 type BasicProfViewProps = ProfViewComponentProps & {}
@@ -202,47 +203,84 @@ interface ProfItemViewProps {
 const ProfItemView: FC<ProfItemViewProps> = ({ profItem, theme }) => {
     const muiTheme = useTheme()
     const [openTooltip, setOpenTooltip] = useState(false)
+    const detailDialog = useUtilDialog()
 
-    const content = profItem.value.type === "text"
+    // const content = profItem.value.type === "text"
+    //     ? <Box fontSize="0.8em">
+    //         {profItem.name}
+    //         :
+    //         <Box component="span" fontWeight="bold">{profItem.value.text}</Box>
+    //     </Box>
+    //     : <Link
+    //         color="inherit"
+    //         underline="hover"
+    //         href={profItem.value.link}
+    //         target="_blank"
+    //         rel="noreferrer"
+    //     >
+    //         {profItem.name}
+    //     </Link>
+    const chipContent = profItem.value.type === "text"
         ? <Box fontSize="0.8em">
             {profItem.name}
             :
             <Box component="span" fontWeight="bold">{profItem.value.text}</Box>
         </Box>
-        : <Link
-            color="inherit"
-            underline="hover"
-            href={profItem.value.link}
-            target="_blank"
-            rel="noreferrer"
-        >
-            {profItem.name}
-        </Link>
+        : <Box component="span" fontWeight="bold">{profItem.name}</Box>
+    const detailContent = profItem.value.type === "text"
+        ? <Box fontWeight="bold">{profItem.value.text}</Box>
+        : <></>
+    const detailsActions = profItem.value.type === "link"
+        ? <Button href={profItem.value.link}>
+            リンクを開く
+        </Button>
+        : <></>
     return (
-        <Tooltip
-            title={profItem.comment}
-            open={openTooltip}
-            onOpen={() => setOpenTooltip(true)}
-            onClose={() => setOpenTooltip(false)}
-            leaveTouchDelay={Number.MAX_VALUE}
-        >
-            <Box
-                key={profItem.name}
-                p={0.5}
-                mr={1}
-                sx={{
-                    width: "fit-content",
-                    borderRadius: "0.5rem",
-                    backgroundColor: theme.color,
-                    color: muiTheme.palette.getContrastText(theme.color),
-                    flexGrow: 0,
-                    flexShrink: 0,
-                    cursor: "pointer",
-                    margin: "0.3rem",
-                }}
-                onClick={() => setOpenTooltip(p => !p)}
-            >{content}</Box>
-        </Tooltip>
+        <>
+            <Tooltip
+                title={profItem.comment}
+                open={openTooltip}
+                onOpen={() => setOpenTooltip(true)}
+                onClose={() => setOpenTooltip(false)}
+                leaveTouchDelay={Number.MAX_VALUE}
+            >
+                <Box
+                    key={profItem.name}
+                    p={0.5}
+                    mr={1}
+                    sx={{
+                        width: "fit-content",
+                        borderRadius: "0.5rem",
+                        backgroundColor: theme.color,
+                        color: muiTheme.palette.getContrastText(theme.color),
+                        flexGrow: 0,
+                        flexShrink: 0,
+                        cursor: "pointer",
+                        margin: "0.3rem",
+                    }}
+                    onClick={detailDialog.show}
+                >{chipContent}</Box>
+            </Tooltip>
+            <UtilDialog {...detailDialog.dialogProps}>
+                <DialogTitle>
+                    {profItem.name}
+                </DialogTitle>
+                <DialogContent>
+                    <Box fontSize="1.2em">
+                        {detailContent}
+                    </Box>
+                    <Box>
+                        {profItem.comment}
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    {detailsActions}
+                    <Button variant="text" onClick={detailDialog.hide}>
+                        閉じる
+                    </Button>
+                </DialogActions>
+            </UtilDialog>
+        </>
     )
 }
 

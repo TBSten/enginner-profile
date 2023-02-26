@@ -1,5 +1,5 @@
 import { useResponsive } from "@/lib/client/responsive";
-import { Dialog, DialogProps, Drawer, DrawerProps } from "@mui/material";
+import { Box, Dialog, DialogProps, Drawer, DrawerProps } from "@mui/material";
 import { FC, ReactNode, useState } from "react";
 
 export interface UtilDialogProps {
@@ -24,7 +24,9 @@ const UtilDialog: FC<UtilDialogProps> = ({
     } else {
         return (
             <Drawer {...{ open, onClose }} anchor="bottom" {...drawerProps}>
-                {children}
+                <Box maxHeight="80vh" overflow="auto">
+                    {children}
+                </Box>
             </Drawer>
         );
 

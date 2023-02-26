@@ -144,30 +144,65 @@ const SkillRow: FC<SkillRowProps> = ({ theme, skill, index }) => {
     const color = isFill ? muiTheme.palette.getContrastText(theme.color) : theme.color
     const borderColor = theme.color
 
-    const [showAll, setShowAll] = useState(false)
+    const detaiDialog = useUtilDialog()
 
     return (
-        <Box
-            key={skill.name}
-            p={1}
-            sx={{ backgroundColor, border: "solid 2px", borderColor, }}
-            color={color}
-            borderRadius="1rem"
-            onClick={() => setShowAll(p => !p)}
-        >
-            <Stack fontWeight="bold" direction={{ xs: "column", sm: "row" }} flexWrap="wrap" justifyContent="space-between">
-                <Box>
-                    {showAll
-                        ? skill.name
-                        : `${skill.name.slice(0, 20)}${skill.name.length >= 20 ? "..." : ""}`
+        <>
+            <Box
+                key={skill.name}
+                p={1}
+                sx={{ backgroundColor, border: "solid 2px", borderColor, }}
+                color={color}
+                borderRadius="1rem"
+                onClick={detaiDialog.show}
+            >
+                <Stack
+                    fontWeight="bold"
+                    direction={{ xs: "column", sm: "row" }}
+                    flexWrap="wrap"
+                    justifyContent="space-between"
+                >
+                    <Box>
+                        {`${skill.name.slice(0, 20)}${skill.name.length >= 20 ? "..." : ""}`}
+                    </Box>
+                    <Box>
+                        {"⭐️".repeat(skill.assessment.value + 1)}
+                        {"☆".repeat(4 - skill.assessment.value - 1)}
+                    </Box>
+                </Stack>
+            </Box>
+            <UtilDialog {...detaiDialog.dialogProps}>
+                <Box p={2} sx={{ fontSize: "1.5em", fontWeight: "bold", minWidth: "20vw" }}>
+                    {
+                        (skill.appeal ? "⭐️ " : "") +
+                        skill.name
                     }
                 </Box>
-                <Box>
-                    {"⭐️".repeat(skill.assessment.value + 1)}
-                    {"☆".repeat(4 - skill.assessment.value - 1)}
+                <Box p={1}>
+                    <Box>
+                        {"評価: "}
+                        <Box component="span" fontWeight="bold" fontSize="1.5em">
+                            {Math.floor(skill.assessment.value * 100)}
+                        </Box>
+                        <Box component="span">
+                            {" / 100"}
+                        </Box>
+                    </Box>
+                    <Box px={1}>
+                        {skill.assessment.comment}
+                    </Box>
                 </Box>
-            </Stack>
-        </Box>
+                <Divider flexItem />
+                <Box p={2}>
+                    {skill.comment}
+                </Box>
+                <DialogActions>
+                    <Button variant="text" onClick={detaiDialog.hide}>
+                        閉じる
+                    </Button>
+                </DialogActions>
+            </UtilDialog>
+        </>
     );
 }
 
@@ -231,7 +266,7 @@ const ProfItemView: FC<ProfItemViewProps> = ({ profItem, theme }) => {
         ? <Box fontWeight="bold">{profItem.value.text}</Box>
         : <></>
     const detailsActions = profItem.value.type === "link"
-        ? <Button href={profItem.value.link}>
+        ? <Button variant="outlined" target="_blank" href={profItem.value.link}>
             リンクを開く
         </Button>
         : <></>

@@ -1095,7 +1095,7 @@ const ProfItemValueEdit: FC<ProfItemValueEditProps> = ({ name, value, onChange }
                     テキスト
                 </MenuItem>
                 <MenuItem
-                    onClick={() => onChange({ type: "link", link: "https://github.com/hogehoge" })}
+                    onClick={() => onChange({ type: "link", link: "https://twitter.com/hogehoge" })}
                     disabled={value.type === "link"}
                 >
                     リンク

@@ -47,7 +47,7 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
             console.warn("can not save")
         }
     }, [defaultProf.profId, setProf])
-    const handleSaveProf = useCallback(async () => {
+    const handleSaveProf = handleSave(async () => {
         // TODO save prof
         saveLocal(LOCAL_PROF_KEY, prof)
         await fetch(`/api/prof/${prof.profId}`, {
@@ -55,7 +55,7 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
             body: JSON.stringify(prof),
         })
         setSnackbarContent("保存しました")
-    }, [prof])
+    })
 
     const handleChangeName =
         useCallback((name: string) => setProf(p => ({ ...p, name })), [setProf])
@@ -86,6 +86,7 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
         // keyboard handler
         const handleKeydown = (e: KeyboardEvent) => {
             if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
+                // 保存
                 e.preventDefault()
                 handleSaveProf()
             }
@@ -100,7 +101,7 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
         window.addEventListener("beforeunload", handleOnBeforeUnload)
         return () => {
             document.removeEventListener("keydown", handleKeydown)
-            window.addEventListener("beforeunload", handleOnBeforeUnload)
+            window.removeEventListener("beforeunload", handleOnBeforeUnload)
         }
     }, [handleSaveProf, hasNotSaved])
 

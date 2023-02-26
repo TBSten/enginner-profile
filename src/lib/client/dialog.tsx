@@ -1,4 +1,5 @@
-import { Button, Dialog, DialogActions, DialogContent } from "@mui/material";
+import UtilDialog from "@/components/UtilDialog";
+import { Button, DialogActions, DialogContent } from "@mui/material";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { ReactNode, useCallback } from "react";
 
@@ -40,7 +41,7 @@ const GlobalDialog: FC<GlobalDialogProps> = () => {
     const { hideDialog } = useGlobalDialog()
     const open = !!content
     return (
-        <Dialog open={open} onClose={hideDialog}>
+        <UtilDialog open={open} onClose={hideDialog}>
             <DialogContent>
                 {content}
             </DialogContent>
@@ -51,7 +52,7 @@ const GlobalDialog: FC<GlobalDialogProps> = () => {
                     </Button>
                 </DialogActions>
             }
-        </Dialog>
+        </UtilDialog>
     );
 }
 

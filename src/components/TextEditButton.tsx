@@ -1,12 +1,13 @@
 
 import { Edit } from "@mui/icons-material";
-import { Button, Dialog, DialogActions, DialogContent, DialogProps, DialogTitle, TextField, TextFieldProps } from "@mui/material";
+import { Button, DialogActions, DialogContent, DialogTitle, TextField, TextFieldProps } from "@mui/material";
 import { FC, ReactNode, useState } from "react";
+import UtilDialog, { UtilDialogProps } from "./UtilDialog";
 
 type TextEditButtonProps = TextFieldProps & {
     icon?: ReactNode
     label: string
-    dialogProps?: DialogProps
+    dialogProps?: UtilDialogProps
 }
 const TextEditButton: FC<TextEditButtonProps> = ({
     icon = <Edit />,
@@ -21,7 +22,7 @@ const TextEditButton: FC<TextEditButtonProps> = ({
             <Button onClick={() => setOpenDialog(true)} startIcon={icon} color={color}>
                 {label}
             </Button>
-            <Dialog open={openDialog} onClose={() => setOpenDialog(false)} {...dialogProps} fullWidth>
+            <UtilDialog open={openDialog} onClose={() => setOpenDialog(false)} {...dialogProps} dialogProps={{ fullWidth: true }}>
                 <DialogTitle>
                     {label}
                 </DialogTitle>
@@ -36,7 +37,7 @@ const TextEditButton: FC<TextEditButtonProps> = ({
                         閉じる
                     </Button>
                 </DialogActions>
-            </Dialog>
+            </UtilDialog>
         </>
     );
 }

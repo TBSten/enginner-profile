@@ -5,6 +5,7 @@ import MenuButton from '@/components/MenuButton';
 import Right from '@/components/Right';
 import TextEditButton from '@/components/TextEditButton';
 import ThemeTypePicker from '@/components/ThemeTypePicker';
+import UtilDialog from '@/components/UtilDialog';
 import BaseLayout from '@/components/layout/BaseLayout';
 import LayoutContent from '@/components/layout/LayoutContent';
 import { copyToClipboard } from '@/lib/client/copy';
@@ -19,7 +20,7 @@ import { tokenToUserId } from '@/lib/server/user/token';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { Assessment, Prof, ProfItem, ProfItemValue, ProfSchema, Skill, ThemeType } from '@/types';
 import { Add, Clear, ContentCopy, Delete, Edit, KeyboardArrowUp, KeyboardDoubleArrowDown, KeyboardDoubleArrowUp, MoreVert, Save } from '@mui/icons-material';
-import { Alert, Box, Button, CircularProgress, Container, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Fab, Grid, IconButton, InputBase, ListItemIcon, Menu, MenuItem, Popover, Slider, Snackbar, Stack, Switch, TextField, Tooltip, useTheme } from '@mui/material';
+import { Alert, Box, Button, CircularProgress, Container, DialogActions, DialogContent, DialogTitle, Divider, Fab, Grid, IconButton, InputBase, ListItemIcon, Menu, MenuItem, Popover, Slider, Snackbar, Stack, Switch, TextField, Tooltip, useTheme } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 import { getServerSession } from 'next-auth';
 import Head from 'next/head';
@@ -725,7 +726,7 @@ const AssessmentInput: FC<AssessmentInputProps> = ({
                 </MenuItem>
             </Menu>
 
-            <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth>
+            <UtilDialog open={openDialog} onClose={() => setOpenDialog(false)} dialogProps={{ fullWidth: true }}>
                 <DialogTitle>
                     {skillName}
                 </DialogTitle>
@@ -759,7 +760,7 @@ const AssessmentInput: FC<AssessmentInputProps> = ({
                         OK
                     </Button>
                 </DialogActions>
-            </Dialog>
+            </UtilDialog>
 
         </>
     );

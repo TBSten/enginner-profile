@@ -93,7 +93,7 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
         }
         // closing handler
         const handleOnBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (!hasNotSaved) return
+            if (!hasNotSaved()) return
             e.returnValue = "保存していないデータがあります。閉じてもいいですか？"
             return e.returnValue
         }

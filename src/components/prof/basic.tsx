@@ -1,12 +1,13 @@
 import { Prof, ProfItem, Skill } from "@/types";
-import { Box, Button, Container, Divider, Grid, Link, Stack, Tooltip, alpha, useTheme } from "@mui/material";
+import { Box, Button, Container, DialogActions, DialogContent, DialogTitle, Divider, Grid, Stack, Tooltip, alpha, useTheme } from "@mui/material";
 import Image from "next/image";
 import { FC, useState } from "react";
 import Center from "../Center";
+import UtilDialog, { useUtilDialog } from "../UtilDialog";
 import { ProfViewComponentProps } from "./util";
 
-type FashionableProfViewProps = ProfViewComponentProps & {}
-const FashionableProfView: FC<FashionableProfViewProps> = ({ prof }) => {
+type BasicProfViewProps = ProfViewComponentProps & {}
+const BasicProfView: FC<BasicProfViewProps> = ({ prof }) => {
     return (
         <Box borderRadius="1rem" position="relative" overflow="hidden" sx={{ backgroundColor: alpha("#fff", 0.5) }}>
             <Overview prof={prof} />
@@ -23,7 +24,7 @@ const FashionableProfView: FC<FashionableProfViewProps> = ({ prof }) => {
     );
 }
 
-export default FashionableProfView;
+export default BasicProfView;
 
 
 interface OverviewProps {
@@ -143,30 +144,65 @@ const SkillRow: FC<SkillRowProps> = ({ theme, skill, index }) => {
     const color = isFill ? muiTheme.palette.getContrastText(theme.color) : theme.color
     const borderColor = theme.color
 
-    const [showAll, setShowAll] = useState(false)
+    const detaiDialog = useUtilDialog()
 
     return (
-        <Box
-            key={skill.name}
-            p={1}
-            sx={{ backgroundColor, border: "solid 2px", borderColor, }}
-            color={color}
-            borderRadius="1rem"
-            onClick={() => setShowAll(p => !p)}
-        >
-            <Stack fontWeight="bold" direction={{ xs: "column", sm: "row" }} flexWrap="wrap" justifyContent="space-between">
-                <Box>
-                    {showAll
-                        ? skill.name
-                        : `${skill.name.slice(0, 20)}${skill.name.length >= 20 ? "..." : ""}`
+        <>
+            <Box
+                key={skill.name}
+                p={1}
+                sx={{ backgroundColor, border: "solid 2px", borderColor, }}
+                color={color}
+                borderRadius="1rem"
+                onClick={detaiDialog.show}
+            >
+                <Stack
+                    fontWeight="bold"
+                    direction={{ xs: "column", sm: "row" }}
+                    flexWrap="wrap"
+                    justifyContent="space-between"
+                >
+                    <Box>
+                        {`${skill.name.slice(0, 20)}${skill.name.length >= 20 ? "..." : ""}`}
+                    </Box>
+                    <Box>
+                        {"⭐️".repeat(skill.assessment.value + 1)}
+                        {"☆".repeat(4 - skill.assessment.value - 1)}
+                    </Box>
+                </Stack>
+            </Box>
+            <UtilDialog {...detaiDialog.dialogProps}>
+                <Box p={2} sx={{ fontSize: "1.5em", fontWeight: "bold", minWidth: "20vw" }}>
+                    {
+                        (skill.appeal ? "⭐️ " : "") +
+                        skill.name
                     }
                 </Box>
-                <Box>
-                    {"⭐️".repeat(skill.assessment.value + 1)}
-                    {"☆".repeat(4 - skill.assessment.value - 1)}
+                <Box p={1}>
+                    <Box>
+                        {"評価: "}
+                        <Box component="span" fontWeight="bold" fontSize="1.5em">
+                            {Math.floor(skill.assessment.value * 100)}
+                        </Box>
+                        <Box component="span">
+                            {" / 100"}
+                        </Box>
+                    </Box>
+                    <Box px={1}>
+                        {skill.assessment.comment}
+                    </Box>
                 </Box>
-            </Stack>
-        </Box>
+                <Divider flexItem />
+                <Box p={2}>
+                    {skill.comment}
+                </Box>
+                <DialogActions>
+                    <Button variant="text" onClick={detaiDialog.hide}>
+                        閉じる
+                    </Button>
+                </DialogActions>
+            </UtilDialog>
+        </>
     );
 }
 
@@ -202,47 +238,84 @@ interface ProfItemViewProps {
 const ProfItemView: FC<ProfItemViewProps> = ({ profItem, theme }) => {
     const muiTheme = useTheme()
     const [openTooltip, setOpenTooltip] = useState(false)
+    const detailDialog = useUtilDialog()
 
-    const content = profItem.value.type === "text"
+    // const content = profItem.value.type === "text"
+    //     ? <Box fontSize="0.8em">
+    //         {profItem.name}
+    //         :
+    //         <Box component="span" fontWeight="bold">{profItem.value.text}</Box>
+    //     </Box>
+    //     : <Link
+    //         color="inherit"
+    //         underline="hover"
+    //         href={profItem.value.link}
+    //         target="_blank"
+    //         rel="noreferrer"
+    //     >
+    //         {profItem.name}
+    //     </Link>
+    const chipContent = profItem.value.type === "text"
         ? <Box fontSize="0.8em">
             {profItem.name}
             :
             <Box component="span" fontWeight="bold">{profItem.value.text}</Box>
         </Box>
-        : <Link
-            color="inherit"
-            underline="hover"
-            href={profItem.value.link}
-            target="_blank"
-            rel="noreferrer"
-        >
-            {profItem.name}
-        </Link>
+        : <Box component="span" fontWeight="bold">{profItem.name}</Box>
+    const detailContent = profItem.value.type === "text"
+        ? <Box fontWeight="bold">{profItem.value.text}</Box>
+        : <></>
+    const detailsActions = profItem.value.type === "link"
+        ? <Button variant="outlined" target="_blank" href={profItem.value.link}>
+            リンクを開く
+        </Button>
+        : <></>
     return (
-        <Tooltip
-            title={profItem.comment}
-            open={openTooltip}
-            onOpen={() => setOpenTooltip(true)}
-            onClose={() => setOpenTooltip(false)}
-            leaveTouchDelay={Number.MAX_VALUE}
-        >
-            <Box
-                key={profItem.name}
-                p={0.5}
-                mr={1}
-                sx={{
-                    width: "fit-content",
-                    borderRadius: "0.5rem",
-                    backgroundColor: theme.color,
-                    color: muiTheme.palette.getContrastText(theme.color),
-                    flexGrow: 0,
-                    flexShrink: 0,
-                    cursor: "pointer",
-                    margin: "0.3rem",
-                }}
-                onClick={() => setOpenTooltip(p => !p)}
-            >{content}</Box>
-        </Tooltip>
+        <>
+            <Tooltip
+                title={profItem.comment}
+                open={openTooltip}
+                onOpen={() => setOpenTooltip(true)}
+                onClose={() => setOpenTooltip(false)}
+                leaveTouchDelay={Number.MAX_VALUE}
+            >
+                <Box
+                    key={profItem.name}
+                    p={0.5}
+                    mr={1}
+                    sx={{
+                        width: "fit-content",
+                        borderRadius: "0.5rem",
+                        backgroundColor: theme.color,
+                        color: muiTheme.palette.getContrastText(theme.color),
+                        flexGrow: 0,
+                        flexShrink: 0,
+                        cursor: "pointer",
+                        margin: "0.3rem",
+                    }}
+                    onClick={detailDialog.show}
+                >{chipContent}</Box>
+            </Tooltip>
+            <UtilDialog {...detailDialog.dialogProps}>
+                <DialogTitle>
+                    {profItem.name}
+                </DialogTitle>
+                <DialogContent>
+                    <Box fontSize="1.2em">
+                        {detailContent}
+                    </Box>
+                    <Box>
+                        {profItem.comment}
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    {detailsActions}
+                    <Button variant="text" onClick={detailDialog.hide}>
+                        閉じる
+                    </Button>
+                </DialogActions>
+            </UtilDialog>
+        </>
     )
 }
 

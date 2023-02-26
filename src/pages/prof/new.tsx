@@ -1,5 +1,6 @@
 import { useSession } from "@/lib/client/auth";
 import { useGlobalDialog } from "@/lib/client/dialog";
+import { LOCAL_PROF_KEY, saveLocal } from "@/lib/client/saveLocal";
 import { getUser } from "@/lib/server/user";
 import { ProfSchema, User } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,6 +36,7 @@ const NewProfPage: NextPage<Props> = ({ user }) => {
             body: JSON.stringify(data),
         }).then(r => r.json())
         const newProf = ProfSchema.parse(res)
+        saveLocal(LOCAL_PROF_KEY, newProf)
         showDialog("プロフ編集画面に移動中", { canClose: false })
         router.push(`/prof/${newProf.profId}/edit`)
     })

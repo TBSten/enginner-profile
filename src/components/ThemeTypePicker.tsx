@@ -1,9 +1,10 @@
 import { ThemeType } from "@/types";
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from "@mui/material";
+import { Box, Button, DialogActions, DialogContent, DialogTitle, Grid } from "@mui/material";
 import Image from "next/image";
 import { FC, ReactNode, useState } from "react";
 import Center from "./Center";
 import SelectableBox from "./SelectableBox";
+import UtilDialog from "./UtilDialog";
 
 interface ThemeTypePickerProps {
     type: ThemeType
@@ -17,7 +18,7 @@ const ThemeTypePicker: FC<ThemeTypePickerProps> = ({
     return (
         <>
             <Box sx={{ cursor: "pointer" }} onClick={() => setOpenThemeDialog(true)} maxWidth={450}>
-                {type === "fashionable" &&
+                {type === "basic" &&
                     <BasicTypeImage />
                 }
                 {type === "bad" &&
@@ -30,7 +31,7 @@ const ThemeTypePicker: FC<ThemeTypePickerProps> = ({
                     テーマを選択
                 </Center>
             </Box>
-            <Dialog open={openThemeDialog} onClose={() => setOpenThemeDialog(false)}>
+            <UtilDialog open={openThemeDialog} onClose={() => setOpenThemeDialog(false)}>
                 <DialogTitle>
                     {label}
                 </DialogTitle>
@@ -39,9 +40,9 @@ const ThemeTypePicker: FC<ThemeTypePickerProps> = ({
 
                         <Grid item xs={12} sm={6}>
                             <SelectableBox
-                                select={type === "fashionable"}
-                                onSelect={() => onChange("fashionable")}
-                                onUnselect={() => onChange("fashionable")}
+                                select={type === "basic"}
+                                onSelect={() => onChange("basic")}
+                                onUnselect={() => onChange("basic")}
                             >
                                 <BasicTypeImage />
                             </SelectableBox>
@@ -74,7 +75,7 @@ const ThemeTypePicker: FC<ThemeTypePickerProps> = ({
                         閉じる
                     </Button>
                 </DialogActions>
-            </Dialog>
+            </UtilDialog>
         </>
     );
 }

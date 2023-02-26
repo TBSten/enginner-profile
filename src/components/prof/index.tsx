@@ -1,7 +1,7 @@
 import { themeTypes } from "@/types"
 import { ComponentType } from "react"
 import BadProfView from "./bad"
-import FashionableProfView from "./fashionable"
+import BasicProfView from "./basic"
 import FilesProfView from "./files"
 import { ProfViewComponentProps } from "./util"
 
@@ -11,7 +11,7 @@ const themeTypeAndComponentMap: {
     [key in ThemeTypeUnion]: ComponentType<ProfViewComponentProps>
 } = {
     "bad": BadProfView,
-    "fashionable": FashionableProfView,
+    "basic": BasicProfView,
     "files": FilesProfView,
 }
 

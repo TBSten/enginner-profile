@@ -1,9 +1,9 @@
 import { Box, BoxProps } from "@mui/material";
-import { FC } from "react";
+import React from "react";
 
 interface CenterProps extends BoxProps {
 }
-const Center: FC<CenterProps> = ({ ...boxProps }) => {
+const Center = React.forwardRef<HTMLDivElement, CenterProps>(function Center({ ...boxProps }, ref) {
     return (
         <Box
             display="flex"
@@ -12,8 +12,9 @@ const Center: FC<CenterProps> = ({ ...boxProps }) => {
             alignItems="center"
             textAlign="center"
             {...boxProps}
+            ref={ref}
         />
     );
-}
+})
 
 export default Center;

@@ -11,6 +11,7 @@ import { copyToClipboard } from '@/lib/client/copy';
 import { chooseFile } from '@/lib/client/file';
 import { useLoading } from '@/lib/client/loading';
 import { useResponsive } from '@/lib/client/responsive';
+import { useSavable } from '@/lib/client/savable';
 import { LOCAL_PROF_KEY, getLocal, saveLocal } from '@/lib/client/saveLocal';
 import { upload } from '@/lib/client/upload';
 import { getProf } from '@/lib/server/prof';
@@ -31,7 +32,8 @@ interface Props {
     prof: Prof
 }
 const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
-    const [prof, setProf] = useState(defaultProf)
+    // const [prof, setProf] = useState(defaultProf)
+    const [prof, setProf, { hasNotSaved, handleSave }] = useSavable(defaultProf)
     const [snackbarContent, setSnackbarContent] = useState<null | string>(null)
     useEffect(() => {
         const saveData = getLocal(LOCAL_PROF_KEY)
@@ -44,7 +46,7 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
             // 保存されたものを編集できない
             console.warn("can not save")
         }
-    }, [defaultProf.profId])
+    }, [defaultProf.profId, setProf])
     const handleSaveProf = useCallback(async () => {
         // TODO save prof
         saveLocal(LOCAL_PROF_KEY, prof)
@@ -56,29 +58,51 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
     }, [prof])
 
     const handleChangeName =
-        useCallback((name: string) => setProf(p => ({ ...p, name })), [])
+        useCallback((name: string) => setProf(p => ({ ...p, name })), [setProf])
     const handleChangeFreeSpace =
-        useCallback((freeSpace: string) => setProf(p => ({ ...p, freeSpace })), [])
+        useCallback((freeSpace: string) => setProf(p => ({ ...p, freeSpace })), [setProf])
     const handleChangeIcon =
-        useCallback((icon: string) => setProf(p => ({ ...p, icon })), [])
+        useCallback((icon: string) => setProf(p => ({ ...p, icon })), [setProf])
     const handleChangeColor =
-        useCallback((color: string) => setProf(p => ({ ...p, theme: { ...p.theme, color } })), [])
+        useCallback((color: string) => setProf(p => ({ ...p, theme: { ...p.theme, color } })), [setProf])
     const handleChangeThemeType =
-        useCallback((type: ThemeType) => setProf(p => ({ ...p, theme: { ...p.theme, type } })), [])
+        useCallback((type: ThemeType) => setProf(p => ({ ...p, theme: { ...p.theme, type } })), [setProf])
     const handleChangeSkills: SkillsSectionProps["onChangeSkills"] =
-        useCallback(updater => setProf(p => ({ ...p, skills: updater(p.skills) })), [])
+        useCallback(updater => setProf(p => ({ ...p, skills: updater(p.skills) })), [setProf])
     const handleChangeSkillComment =
-        useCallback((skillComment: string | null) => setProf(p => ({ ...p, skillComment })), [])
+        useCallback((skillComment: string | null) => setProf(p => ({ ...p, skillComment })), [setProf])
     const handleChangeProfItemComment =
-        useCallback((profItemComment: string | null) => setProf(p => ({ ...p, profItemComment })), [])
+        useCallback((profItemComment: string | null) => setProf(p => ({ ...p, profItemComment })), [setProf])
     const handleChangeProfItems: ProfItemsSectionProps["onChangeProfItems"] =
-        useCallback(updater => setProf(p => ({ ...p, profItems: updater(p.profItems) })), [])
+        useCallback(updater => setProf(p => ({ ...p, profItems: updater(p.profItems) })), [setProf])
     const handleChangePublich: OutputSectionProps["onChangePublish"] =
-        useCallback(publish => setProf(p => ({ ...p, publish })), [])
+        useCallback(publish => setProf(p => ({ ...p, publish })), [setProf])
     const handleChangeSlug: OverviewProps["onChangeSlug"] =
-        useCallback(slug => setProf(p => ({ ...p, slug })), [])
+        useCallback(slug => setProf(p => ({ ...p, slug })), [setProf])
     const handleChangeImages: OverviewProps["onChangeImages"] =
-        useCallback(updater => setProf(p => ({ ...p, images: updater(p.images) })), [])
+        useCallback(updater => setProf(p => ({ ...p, images: updater(p.images) })), [setProf])
+
+    useEffect(() => {
+        // keyboard handler
+        const handleKeydown = (e: KeyboardEvent) => {
+            if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault()
+                handleSaveProf()
+            }
+        }
+        // closing handler
+        const handleOnBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (!hasNotSaved) return
+            e.returnValue = "保存していないデータがあります。閉じてもいいですか？"
+            return e.returnValue
+        }
+        document.addEventListener("keydown", handleKeydown)
+        window.addEventListener("beforeunload", handleOnBeforeUnload)
+        return () => {
+            document.removeEventListener("keydown", handleKeydown)
+            window.addEventListener("beforeunload", handleOnBeforeUnload)
+        }
+    }, [handleSaveProf, hasNotSaved])
 
     return (
         <>

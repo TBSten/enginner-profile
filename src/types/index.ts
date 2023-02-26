@@ -2,7 +2,7 @@ import { z } from "zod"
 
 export const themeTypes = [
     "bad",          // ダサい
-    "fashionable",  // おしゃれ
+    "basic",  // おしゃれ
     "files",        // json,csvなどのファイル
 ] as const
 export const ThemeTypeSchema = z.enum(themeTypes)

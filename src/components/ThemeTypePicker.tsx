@@ -17,7 +17,7 @@ const ThemeTypePicker: FC<ThemeTypePickerProps> = ({
     return (
         <>
             <Box sx={{ cursor: "pointer" }} onClick={() => setOpenThemeDialog(true)} maxWidth={450}>
-                {type === "fashionable" &&
+                {type === "basic" &&
                     <BasicTypeImage />
                 }
                 {type === "bad" &&
@@ -39,9 +39,9 @@ const ThemeTypePicker: FC<ThemeTypePickerProps> = ({
 
                         <Grid item xs={12} sm={6}>
                             <SelectableBox
-                                select={type === "fashionable"}
-                                onSelect={() => onChange("fashionable")}
-                                onUnselect={() => onChange("fashionable")}
+                                select={type === "basic"}
+                                onSelect={() => onChange("basic")}
+                                onUnselect={() => onChange("basic")}
                             >
                                 <BasicTypeImage />
                             </SelectableBox>

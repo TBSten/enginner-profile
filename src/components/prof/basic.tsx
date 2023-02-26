@@ -5,8 +5,8 @@ import { FC, useState } from "react";
 import Center from "../Center";
 import { ProfViewComponentProps } from "./util";
 
-type FashionableProfViewProps = ProfViewComponentProps & {}
-const FashionableProfView: FC<FashionableProfViewProps> = ({ prof }) => {
+type BasicProfViewProps = ProfViewComponentProps & {}
+const BasicProfView: FC<BasicProfViewProps> = ({ prof }) => {
     return (
         <Box borderRadius="1rem" position="relative" overflow="hidden" sx={{ backgroundColor: alpha("#fff", 0.5) }}>
             <Overview prof={prof} />
@@ -23,7 +23,7 @@ const FashionableProfView: FC<FashionableProfViewProps> = ({ prof }) => {
     );
 }
 
-export default FashionableProfView;
+export default BasicProfView;
 
 
 interface OverviewProps {

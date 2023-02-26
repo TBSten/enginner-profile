@@ -22,7 +22,7 @@ const getDefaultProf = (profId: string, authorId: string): Prof => ({
     createAt: Date.now(),
     updateAt: Date.now(),
     theme: {
-        type: "fashionable",
+        type: "basic",
         color: getRandomColor()[1],
     },
     publishAt: null,

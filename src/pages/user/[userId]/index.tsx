@@ -3,13 +3,17 @@ import Left from '@/components/Left';
 import BaseLayout from '@/components/layout/BaseLayout';
 import LayoutContent from '@/components/layout/LayoutContent';
 import { useSession } from '@/lib/client/auth';
+import { useResponsive } from '@/lib/client/responsive';
 import { getProfsByUser } from '@/lib/server/prof';
 import { getUser } from '@/lib/server/user';
 import { Prof, User } from '@/types';
-import { Add } from '@mui/icons-material';
-import { Box, Button, Card, CardActionArea, Divider, Grid, Stack } from '@mui/material';
+import { Add, MoreVert } from '@mui/icons-material';
+import { Box, Button, Card, CardActionArea, Divider, Grid, IconButton, Menu, MenuItem, Stack } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
+import { signOut } from 'next-auth/react';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
+import { FC, useRef, useState } from 'react';
 
 interface Props {
     user: User
@@ -24,6 +28,14 @@ const UserProfilePage: NextPage<Props> = ({ user, profs }) => {
     } as const
     const { data: session } = useSession()
     const isMe = session?.user.userId === user.userId
+    const router = useRouter()
+    const gotoEditUser = () => {
+        router.push(`/user/${user.userId}/edit`)
+    }
+    const handleSignOut = () => {
+        signOut({ redirect: false })
+        router.push(`/login`)
+    }
     return (
         <>
             <BaseLayout>
@@ -45,11 +57,11 @@ const UserProfilePage: NextPage<Props> = ({ user, profs }) => {
                             </Left>
                         </Stack>
                         <Center>
-                            {isMe &&
-                                <Button variant="outlined" href={`/user/${user.userId}/edit`}>
-                                    編集
-                                </Button>
-                            }
+                            <UserMenu
+                                isMe={isMe}
+                                onEdit={gotoEditUser}
+                                onSignOut={handleSignOut}
+                            />
                         </Center>
                     </Stack>
                 </LayoutContent>
@@ -99,6 +111,51 @@ const UserProfilePage: NextPage<Props> = ({ user, profs }) => {
     );
 }
 export default UserProfilePage;
+
+interface UserMenuProps {
+    isMe: boolean
+    onEdit: () => void
+    onSignOut: () => void
+}
+const UserMenu: FC<UserMenuProps> = ({
+    isMe,
+    onEdit,
+    onSignOut,
+}) => {
+    const [openMenu, setOpenMenu] = useState(false)
+    const btnRef = useRef<HTMLButtonElement>(null)
+    const { isPc } = useResponsive()
+    return (
+        <>
+            {isPc
+                ? <IconButton onClick={() => setOpenMenu(true)} ref={btnRef}>
+                    <MoreVert />
+                </IconButton>
+                : <Button variant='outlined' onClick={() => setOpenMenu(true)} ref={btnRef}>
+                    メニュー
+                </Button>
+            }
+
+            <Menu
+                open={openMenu}
+                onClose={() => setOpenMenu(false)}
+                anchorEl={btnRef.current}
+            >
+                {isMe &&
+                    <MenuItem onClick={onEdit}>
+                        編集する
+                    </MenuItem>
+                }
+                <Divider />
+                {isMe &&
+                    <MenuItem onClick={onSignOut}>
+                        ログアウトする
+                    </MenuItem>
+                }
+            </Menu>
+        </>
+    );
+}
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     const requestUserId = ctx.query.userId as string

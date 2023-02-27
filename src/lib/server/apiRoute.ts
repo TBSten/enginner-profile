@@ -29,17 +29,18 @@ export const apiRoute = ({
     let query = {}
     let body = null
     try {
-        const method = req.method
+        const method = req.method?.toUpperCase()
         session = await getServerSession(req, res, authOptions)
         query = req.query as Record<string, string>
         body = tryAndCatch(() => JSON.parse(req.body), (e) => null)
+
         if (method === "GET") {
             if (!onGet) return res.status(405).json({ msg: `method ${method} is not allowed` })
             return onGet({ req, res, query, session, body })
         } else if (method === "POST") {
             if (!onPost) return res.status(405).json({ msg: `method ${method} is not allowed` })
             return onPost({ req, res, query, session, body })
-        } else if (method === "Put") {
+        } else if (method === "PUT") {
             if (!onPut) return res.status(405).json({ msg: `method ${method} is not allowed` })
             return onPut({ req, res, query, session, body })
         } else if (method === "DELETE") {

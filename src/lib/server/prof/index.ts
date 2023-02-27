@@ -84,3 +84,12 @@ export const updateProf = async (profId: string, input: Partial<Prof>): Promise<
     await profs.doc(profId).set(prof, { merge: true })
 }
 
+export const getProfsByUser = async (userId: string) => {
+    const snapshot = await profs
+        .where("authorId", "==", userId)
+        .orderBy("createAt", "desc")
+        .get()
+    return snapshot.docs.map(doc =>
+        ProfSchema.parse(doc.data())
+    )
+}

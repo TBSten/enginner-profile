@@ -1,4 +1,4 @@
-import { addUserIfNotExists } from "@/lib/server/user"
+import { addUserIfNotExists, defaultIcon } from "@/lib/server/user"
 import { User } from "@/types"
 import NextAuth, { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
@@ -54,7 +54,9 @@ export const authOptions: NextAuthOptions = {
             const user: User = {
                 userId: nextAuthUser.id,
                 name: nextAuthUser.name ?? "",
+                icon: nextAuthUser.image ?? defaultIcon,
                 type: nextAuthUser.type,
+                lastNotificatonViewed: 0,
             }
             await addUserIfNotExists(user)
             return true

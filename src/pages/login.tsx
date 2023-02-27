@@ -1,7 +1,9 @@
 import Center from '@/components/Center';
 import BaseLayout from '@/components/layout/BaseLayout';
 import LayoutContent from '@/components/layout/LayoutContent';
-import { Button } from '@mui/material';
+import { getUser } from '@/lib/server/user';
+import { Google, Star } from '@mui/icons-material';
+import { Button, List, ListItem, ListItemIcon, Typography } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 import { getServerSession } from 'next-auth';
 import { signIn } from 'next-auth/react';
@@ -9,7 +11,7 @@ import { authOptions } from './api/auth/[...nextauth]';
 
 interface Props {
 }
-const LoginPage: NextPage<Props> = ({ }) => {
+const LoginPage: NextPage<Props> = () => {
     const handleSignIn = () => {
         signIn("google")
     }
@@ -17,7 +19,36 @@ const LoginPage: NextPage<Props> = ({ }) => {
         <BaseLayout>
             <LayoutContent>
                 <Center>
-                    <Button variant='contained' onClick={handleSignIn}>
+                    <Typography variant='h4' component="h1">
+                        あなたはログインしていません
+                    </Typography>
+                </Center>
+                <Center borderRadius={1} bgcolor="background.paper" my={2} p={2}>
+                    ログインすることで以下のような機能を使用できます。
+                    <List>
+                        <ListItem>
+                            <ListItemIcon>
+                                <Star />
+                            </ListItemIcon>
+                            ホゲホゲ機能
+                        </ListItem>
+                        <ListItem>
+                            <ListItemIcon>
+                                <Star />
+                            </ListItemIcon>
+                            ホゲホゲ機能
+                        </ListItem>
+                        <ListItem>
+                            <ListItemIcon>
+                                <Star />
+                            </ListItemIcon>
+                            ホゲホゲ機能
+                        </ListItem>
+                    </List>
+                </Center>
+                <Center>
+                    <Button variant='contained' onClick={handleSignIn} startIcon={<Google />}>
+                        Googleで
                         ログインする
                     </Button>
                 </Center>
@@ -27,11 +58,14 @@ const LoginPage: NextPage<Props> = ({ }) => {
 }
 export default LoginPage;
 
-export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }) => {
-    const session = await getServerSession(req, res, authOptions)
-    if (session) {
-        // ログインしているならユーザページへ
-        const userId = session.user.userId
+export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+    const session = await getServerSession(ctx.req, ctx.res, authOptions)
+    const user = session !== null
+        ? await getUser(session.user.userId)
+        : null
+    // 既にログイン済みならユーザページへ
+    if (user !== null && user.type !== "anonymous") {
+        const userId = user.userId
         return {
             redirect: {
                 destination: `/user/${userId}`,
@@ -40,6 +74,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ req, res }
         }
     }
     return {
-        props: {}
+        props: {
+            user,
+        }
     }
 }

@@ -80,16 +80,18 @@ const UserProfilePage: NextPage<Props> = ({ user, profs }) => {
                                 </Card>
                             </Grid>
                         )}
-                        <Grid item {...gridItemProps}>
-                            <Button href="/prof/new" sx={{ width: "100%", height: "100%" }}>
-                                <Center>
-                                    <Add />
-                                    <Box mt={2}>
-                                        新しいプロフを作る
-                                    </Box>
-                                </Center>
-                            </Button>
-                        </Grid>
+                        {isMe &&
+                            <Grid item {...gridItemProps}>
+                                <Button href="/prof/new" sx={{ width: "100%", height: "100%" }}>
+                                    <Center>
+                                        <Add />
+                                        <Box mt={2}>
+                                            新しいプロフを作る
+                                        </Box>
+                                    </Center>
+                                </Button>
+                            </Grid>
+                        }
                     </Grid>
                 </LayoutContent>
             </BaseLayout>
@@ -101,7 +103,7 @@ export default UserProfilePage;
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     const requestUserId = ctx.query.userId as string
     const user = await getUser(requestUserId)
-    if (!user) {
+    if (!user || user.type === "anonymous") {
         return { notFound: true }
     }
     const profs = await getProfsByUser(requestUserId)

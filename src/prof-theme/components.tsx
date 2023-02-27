@@ -1,9 +1,9 @@
 import { themeTypes } from "@/types"
 import { ComponentType } from "react"
-import BadProfView from "./bad"
-import BasicProfView from "./basic"
-import FilesProfView from "./files"
-import { ProfViewComponentProps } from "./util"
+import BadProfView from "./bad/components"
+import BasicProfView from "./basic/components"
+import FilesProfView from "./files/components"
+import { ProfViewComponentProps } from "./type"
 
 type ThemeTypeUnion = (typeof themeTypes)[number]
 

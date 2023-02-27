@@ -2,9 +2,9 @@ import { Prof, ProfItem, Skill } from "@/types";
 import { Box, Button, Container, DialogActions, DialogContent, DialogTitle, Divider, Grid, Stack, Tooltip, alpha, useTheme } from "@mui/material";
 import Image from "next/image";
 import { FC, useState } from "react";
-import Center from "../Center";
-import UtilDialog, { useUtilDialog } from "../UtilDialog";
-import { ProfViewComponentProps } from "./util";
+import Center from "../../components/Center";
+import UtilDialog, { useUtilDialog } from "../../components/UtilDialog";
+import { ProfViewComponentProps } from "../type";
 
 type BasicProfViewProps = ProfViewComponentProps & {}
 const BasicProfView: FC<BasicProfViewProps> = ({ prof }) => {

@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import Image from "next/image";
 import { FC } from "react";
-import { ProfViewComponentProps } from "./util";
+import { ProfViewComponentProps } from "../type";
 
 type BadProfViewProps = ProfViewComponentProps & {}
 const BadProfView: FC<BadProfViewProps> = ({ prof }) => {

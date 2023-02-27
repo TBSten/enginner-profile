@@ -5,8 +5,8 @@ import { ContentCopy, Download } from "@mui/icons-material";
 import { Box, Button, Paper, Snackbar, Stack, Tab, Tabs } from "@mui/material";
 import { FC, useMemo, useState } from "react";
 import YAML from "yaml";
-import CodeHighlight from "../CodeHighlight";
-import { ProfViewComponentProps } from "./util";
+import CodeHighlight from "../../components/CodeHighlight";
+import { ProfViewComponentProps } from "../type";
 
 type ViewData = object
 type ViewText = string

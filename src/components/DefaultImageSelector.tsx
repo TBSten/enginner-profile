@@ -3,12 +3,12 @@ import Image from "next/image";
 import { FC } from "react";
 
 const images = [
-    "https://storage.googleapis.com/enginner-prof-user-images/defaults/default-1",
-    "https://storage.googleapis.com/enginner-prof-user-images/defaults/student-1",
-    "https://storage.googleapis.com/enginner-prof-user-images/defaults/front-1",
-    "https://storage.googleapis.com/enginner-prof-user-images/defaults/back-1",
-    "https://storage.googleapis.com/enginner-prof-user-images/defaults/infra-1",
-    "https://storage.googleapis.com/enginner-prof-user-images/defaults/app-1",
+    "https://storage.googleapis.com/enginner-prof-app-images/default-1.png",
+    "https://storage.googleapis.com/enginner-prof-app-images/student-1.png",
+    "https://storage.googleapis.com/enginner-prof-app-images/front-1.png",
+    "https://storage.googleapis.com/enginner-prof-app-images/back-1.png",
+    "https://storage.googleapis.com/enginner-prof-app-images/infra-1.png",
+    "https://storage.googleapis.com/enginner-prof-app-images/app-1.png",
 ]
 
 interface DefaultImageSelectorProps {

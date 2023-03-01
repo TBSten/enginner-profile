@@ -93,7 +93,7 @@ const NewProfHead: FC<NewProfHeadProps> = () => {
             <SeoHead
                 pageTitle="新しいプロフを作成"
                 pageDescription="えんぷろはプログラミングを学ぶ学生やエンジニア向けの手軽な自己紹介を作成するためのサービスです。\nこのページは新しいプロフを作成するページです。"
-                pageImg="/enginner-prof-icon.og.png"
+                pageImg="https://enginner-prof.info/enginner-prof-icon.og.png"
                 pageImgWidth={500}
                 pageImgHeight={500}
             />

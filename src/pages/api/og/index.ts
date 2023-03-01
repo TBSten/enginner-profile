@@ -71,6 +71,7 @@ export default apiRoute({
         con.font = `${fontSize * 7 / 10}px Noto Sans JP`
         con.fillText("のプロフ", width - 70, 70 + fontSize * lines.length + 40)
 
+        res.setHeader("Content-Type", "image/png")
         const png = canvas.createPNGStream()
         png.pipe(res)
     },

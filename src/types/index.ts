@@ -74,7 +74,16 @@ export type GoodToProf = z.infer<typeof GoodToProfSchema>
 
 export const UserSchema = z.object({
     userId: z.string(),
+    icon: z.string(),
     type: z.enum(["anonymous", "normal"]),
     name: z.string(),
+    lastNotificatonViewed: z.number(),
 })
 export type User = z.infer<typeof UserSchema>
+
+export const NotificationSchema = z.object({
+    createAt: z.number(),
+    title: z.string(),
+    image: z.string().nullable(),
+})
+export type Notification = z.infer<typeof NotificationSchema>

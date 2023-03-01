@@ -3,12 +3,13 @@ import Left from '@/components/Left';
 import BaseLayout from '@/components/layout/BaseLayout';
 import LayoutContent from '@/components/layout/LayoutContent';
 import { useSession } from '@/lib/client/auth';
+import { copyToClipboard } from '@/lib/client/copy';
 import { useResponsive } from '@/lib/client/responsive';
 import { getProfsByUser } from '@/lib/server/prof';
 import { getUser } from '@/lib/server/user';
 import { Prof, User } from '@/types';
 import { Add, MoreVert } from '@mui/icons-material';
-import { Box, Button, Card, CardActionArea, Divider, Grid, IconButton, Menu, MenuItem, Stack } from '@mui/material';
+import { Box, Button, Card, CardActionArea, Divider, Grid, IconButton, Menu, MenuItem, Snackbar, Stack } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 import { signOut } from 'next-auth/react';
 import Image from 'next/image';
@@ -36,6 +37,11 @@ const UserProfilePage: NextPage<Props> = ({ user, profs }) => {
         signOut({ redirect: false })
         router.push(`/login`)
     }
+    const [snackbarText, setSnackbarText] = useState<null | string>(null)
+    const handleCopyUserUrl = async () => {
+        await copyToClipboard(`https://enginner-prof.info/user/${user.userId}`)
+        setSnackbarText("コピーしました")
+    }
     return (
         <>
             <BaseLayout>
@@ -61,6 +67,7 @@ const UserProfilePage: NextPage<Props> = ({ user, profs }) => {
                                 isMe={isMe}
                                 onEdit={gotoEditUser}
                                 onSignOut={handleSignOut}
+                                onCopyUserUrl={handleCopyUserUrl}
                             />
                         </Center>
                     </Stack>
@@ -106,6 +113,10 @@ const UserProfilePage: NextPage<Props> = ({ user, profs }) => {
                         }
                     </Grid>
                 </LayoutContent>
+                <Snackbar
+                    open={snackbarText !== null}
+                    message={snackbarText}
+                />
             </BaseLayout>
         </>
     );
@@ -116,11 +127,13 @@ interface UserMenuProps {
     isMe: boolean
     onEdit: () => void
     onSignOut: () => void
+    onCopyUserUrl: () => void
 }
 const UserMenu: FC<UserMenuProps> = ({
     isMe,
     onEdit,
     onSignOut,
+    onCopyUserUrl,
 }) => {
     const [openMenu, setOpenMenu] = useState(false)
     const btnRef = useRef<HTMLButtonElement>(null)
@@ -141,16 +154,19 @@ const UserMenu: FC<UserMenuProps> = ({
                 onClose={() => setOpenMenu(false)}
                 anchorEl={btnRef.current}
             >
+                <MenuItem onClick={onCopyUserUrl}>
+                    URLをコピー
+                </MenuItem>
                 {isMe &&
-                    <MenuItem onClick={onEdit}>
-                        編集する
-                    </MenuItem>
-                }
-                <Divider />
-                {isMe &&
-                    <MenuItem onClick={onSignOut}>
-                        ログアウトする
-                    </MenuItem>
+                    <>
+                        <MenuItem onClick={onEdit}>
+                            編集する
+                        </MenuItem>
+                        <Divider />
+                        <MenuItem onClick={onSignOut}>
+                            ログアウトする
+                        </MenuItem>
+                    </>
                 }
             </Menu>
         </>

@@ -33,10 +33,11 @@ const SeoHead: FC<SeoProps> = ({
             <meta property="og:image:width" content={String(pageImgWidth)} />
             <meta property="og:image:height" content={String(pageImgHeight)} />
             <link rel="preconnect" href="https://fonts.gstatic.com" />
-            {/* <link
-        href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900&amp;display=swap"
-        rel="stylesheet"
-      /> */}
+
+            <meta name="twitter:card" content="summary_large_image"></meta>
+            <meta name="twitter:site" content="@enginner_prof"></meta>
+            <meta name="twitter:creator" content="@tbs__ten"></meta>
+
             <link rel="canonical" href={pagePath} />
         </Head>
     )

@@ -3,6 +3,7 @@ import ColorPicker from '@/components/ColorPicker';
 import DefaultImageSelector from '@/components/DefaultImageSelector';
 import MenuButton from '@/components/MenuButton';
 import Right from '@/components/Right';
+import SeoHead from '@/components/Seo';
 import TextEditButton from '@/components/TextEditButton';
 import ThemeTypePicker from '@/components/ThemeTypePicker';
 import UtilDialog from '@/components/UtilDialog';
@@ -207,8 +208,17 @@ interface ProfDetailHeadProps {
     prof: Prof
 }
 const ProfDetailHead: FC<ProfDetailHeadProps> = ({ prof }) => {
+    const skillNames = prof.skills.filter(sk => sk.appeal).map(sk => sk.name).join(" , ")
+    const profItems = prof.profItems.filter(sk => sk.appeal).map(sk => sk.name).join(" , ")
     return (
         <Head>
+            <SeoHead
+                pageTitle={`${prof.name}のプロフィールの編集`}
+                pageDescription={`${prof.freeSpace} | ${skillNames} | ${profItems}`}
+                pageImg={`/api/og?profId=${prof.profId}`}
+                pageImgWidth={1200}
+                pageImgHeight={630}
+            />
             <title>{`${prof.name}のプロフィール`}</title>
         </Head>
     );

@@ -1,3 +1,4 @@
+import SeoHead from "@/components/Seo";
 import { useSession } from "@/lib/client/auth";
 import { useGlobalDialog } from "@/lib/client/dialog";
 import { LOCAL_PROF_KEY, saveLocal } from "@/lib/client/saveLocal";
@@ -8,8 +9,9 @@ import { Box, Button, Container, InputBase, Stack } from '@mui/material';
 import { GetServerSideProps, NextPage } from 'next';
 import { getServerSession } from "next-auth";
 import { signIn } from "next-auth/react";
+import Head from "next/head";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { FC, useEffect } from "react";
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { authOptions } from "../api/auth/[...nextauth]";
@@ -50,6 +52,7 @@ const NewProfPage: NextPage<Props> = ({ user }) => {
     const { showDialog } = useGlobalDialog()
     return (
         <>
+            <NewProfHead />
             <Box bgcolor={t => t.palette.grey[200]} width="100%" height="100%">
                 <Stack direction="column" justifyContent="center" alignItems="center" sx={{ py: 2 }}
                     component="form" onSubmit={onNewProf}
@@ -81,6 +84,22 @@ const NewProfPage: NextPage<Props> = ({ user }) => {
     );
 }
 export default NewProfPage;
+
+interface NewProfHeadProps {
+}
+const NewProfHead: FC<NewProfHeadProps> = () => {
+    return (
+        <Head>
+            <SeoHead
+                pageTitle="新しいプロフを作成"
+                pageDescription="えんぷろはプログラミングを学ぶ学生やエンジニア向けの手軽な自己紹介を作成するためのサービスです。\nこのページは新しいプロフを作成するページです。"
+                pageImg="/enginner-prof-icon.og.png"
+                pageImgWidth={500}
+                pageImgHeight={500}
+            />
+            <title>{"新しいプロフを作成"}</title>
+        </Head>);
+}
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     const session = await getServerSession(ctx.req, ctx.res, authOptions)

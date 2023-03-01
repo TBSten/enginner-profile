@@ -1,4 +1,5 @@
 import Center from '@/components/Center';
+import SeoHead from '@/components/Seo';
 import BaseLayout from '@/components/layout/BaseLayout';
 import LayoutContent from '@/components/layout/LayoutContent';
 import { getUser } from '@/lib/server/user';
@@ -7,6 +8,8 @@ import { Button, List, ListItem, ListItemIcon, Typography } from '@mui/material'
 import { GetServerSideProps, NextPage } from 'next';
 import { getServerSession } from 'next-auth';
 import { signIn } from 'next-auth/react';
+import Head from 'next/head';
+import { FC } from 'react';
 import { authOptions } from './api/auth/[...nextauth]';
 
 interface Props {
@@ -57,6 +60,23 @@ const LoginPage: NextPage<Props> = () => {
     );
 }
 export default LoginPage;
+
+interface NewProfHeadProps {
+}
+const NewProfHead: FC<NewProfHeadProps> = () => {
+    return (
+        <Head>
+            <SeoHead
+                pageTitle="ログイン"
+                pageDescription="えんぷろはプログラミングを学ぶ学生やエンジニア向けの手軽な自己紹介を作成するためのサービスです。\nこのページはログインするページです。"
+                pageImg="/enginner-prof-icon.og.png"
+                pageImgWidth={500}
+                pageImgHeight={500}
+            />
+            <title>{"ログイン"}</title>
+        </Head>);
+}
+
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     const session = await getServerSession(ctx.req, ctx.res, authOptions)

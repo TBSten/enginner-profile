@@ -12,7 +12,7 @@ export default apiRoute({
         let name = prof.name.length >= 54 ? prof.name.slice(0, 54 - 1) + "..." : prof.name
 
         const width = 1200
-        const height = 640
+        const height = 630
         const fontSize = Math.min(width / 18, height / 5)
         const NotoSansJpPath = path.join(process.cwd(), "src", "styles", "fonts", "Noto_Sans_JP", "NotoSansJP-Regular.otf")
         registerFont(NotoSansJpPath, {

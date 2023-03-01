@@ -215,7 +215,7 @@ const ProfDetailHead: FC<ProfDetailHeadProps> = ({ prof }) => {
             <SeoHead
                 pageTitle={`${prof.name}のプロフィールの編集`}
                 pageDescription={`${prof.freeSpace} | ${skillNames} | ${profItems}`}
-                pageImg={`/api/og?profId=${prof.profId}`}
+                pageImg={`https://enginner-prof.info/api/og?profId=${prof.profId}`}
                 pageImgWidth={1200}
                 pageImgHeight={630}
             />

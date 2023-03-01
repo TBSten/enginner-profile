@@ -20,6 +20,7 @@ const LoginPage: NextPage<Props> = () => {
     }
     return (
         <BaseLayout>
+            <LoginHead />
             <LayoutContent>
                 <Center>
                     <Typography variant='h4' component="h1">
@@ -61,15 +62,15 @@ const LoginPage: NextPage<Props> = () => {
 }
 export default LoginPage;
 
-interface NewProfHeadProps {
+interface LoginHeadProps {
 }
-const NewProfHead: FC<NewProfHeadProps> = () => {
+const LoginHead: FC<LoginHeadProps> = () => {
     return (
         <Head>
             <SeoHead
                 pageTitle="ログイン"
                 pageDescription="えんぷろはプログラミングを学ぶ学生やエンジニア向けの手軽な自己紹介を作成するためのサービスです。\nこのページはログインするページです。"
-                pageImg="/enginner-prof-icon.og.png"
+                pageImg="https://enginner-prof.info/enginner-prof-icon.og.png"
                 pageImgWidth={500}
                 pageImgHeight={500}
             />

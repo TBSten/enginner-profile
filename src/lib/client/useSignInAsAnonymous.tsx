@@ -3,7 +3,7 @@ import { useEffect } from "react"
 import { useSession } from "./auth"
 
 export function useSignInAsAnonymous() {
-    const { data, status } = useSession()
+    const { status } = useSession()
     useEffect(() => {
         if (status === "unauthenticated") {
             signIn("anonymous", { redirect: false, })

@@ -123,9 +123,9 @@ const HeaderSection: FC<HeaderSectionProps> = ({ prof, sentGood: defaultSentGood
         await copyToClipboard(profUrl)
         // onSnackbarShow("URLをコピーしました")
     }
-    const { data: session, status } = useSession()
+    const { session, status } = useSession()
     const [sentGood, setSentGood] = useState(defaultSentGood)
-    const isAuthor = session?.user.userId === prof.authorId
+    const isAuthor = session?.user?.userId === prof.authorId
     const handleGood = async () => {
         if (sentGood) {
             setSentGood(false)

@@ -27,8 +27,8 @@ const UserProfilePage: NextPage<Props> = ({ user, profs }) => {
         md: 3,
         lg: 2,
     } as const
-    const { data: session } = useSession()
-    const isMe = session?.user.userId === user.userId
+    const { session } = useSession()
+    const isMe = session?.user?.userId === user.userId
     const router = useRouter()
     const gotoEditUser = () => {
         router.push(`/user/${user.userId}/edit`)

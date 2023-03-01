@@ -42,7 +42,7 @@ const NewProfPage: NextPage<Props> = ({ user }) => {
         showDialog("プロフ編集画面に移動中", { canClose: false })
         router.push(`/prof/${newProf.profId}/edit`)
     })
-    const { status, data: session } = useSession()
+    const { status } = useSession()
     useEffect(() => {
         if (status === "unauthenticated") {
             signIn("anonymous", { redirect: false, })

@@ -1,17 +1,25 @@
-import { signIn, useSession as useNextAuthSession } from "next-auth/react"
-import { useEffect } from "react"
+import { useSession as useNextAuthSession } from "next-auth/react"
+import { useUser } from "./user"
 
 export function useSession() {
-    const session = useNextAuthSession()
-    const status = session.status === "unauthenticated" ? "loading" : session.status
-    const data = status === "authenticated" ? session.data : null
-    useEffect(() => {
-        if (session.status === "unauthenticated") {
-            signIn("anonymous", { redirect: false, })
-        }
-    }, [session.status])
-    return {
-        data: session.data,
-        status: session.status,
+    const nextAuthSession = useNextAuthSession()
+    const { user, isLoading: isLoadingUser } = useUser(nextAuthSession.data?.user.userId ?? null)
+    const session = {
+        user,
     }
+    const status =
+        nextAuthSession.status === "loading"
+            ? "loading"
+            : nextAuthSession.status === "unauthenticated" ?
+                "unauthenticated"
+                : isLoadingUser
+                    ? "loading"
+                    : user?.type === "normal"
+                        ? "authenticated"
+                        : "unauthenticated"
+
+    return {
+        session,
+        status,
+    } as const
 }

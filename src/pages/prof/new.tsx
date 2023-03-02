@@ -1,4 +1,5 @@
 import SeoHead from "@/components/Seo";
+import BaseLayout from "@/components/layout/BaseLayout";
 import { useSession } from "@/lib/client/auth";
 import { useGlobalDialog } from "@/lib/client/dialog";
 import { LOCAL_PROF_KEY, saveLocal } from "@/lib/client/saveLocal";
@@ -52,34 +53,36 @@ const NewProfPage: NextPage<Props> = ({ user }) => {
     const { showDialog } = useGlobalDialog()
     return (
         <>
-            <NewProfHead />
-            <Box bgcolor={t => t.palette.grey[200]} width="100%" height="100%">
-                <Stack direction="column" justifyContent="center" alignItems="center" sx={{ py: 2 }}
-                    component="form" onSubmit={onNewProf}
-                >
-                    <Container maxWidth="lg">
-                        <Box p={2} bgcolor={t => t.palette.background.paper} width="100%">
-                            <InputBase
-                                fullWidth
-                                inputProps={{
-                                    placeholder: "名前を入力してください(必須)",
-                                    style: {
-                                        fontSize: "2rem",
-                                        textAlign: "center",
-                                    },
-                                    ...register("name"),
-                                }}
-                            />
-                        </Box>
-                    </Container>
-                    <Box width="1px" height="5rem" />
-                    <Container maxWidth="sm">
-                        <Button variant='contained' fullWidth type="submit" disabled={!isValid || isSubmitting}>
-                            プロフを作成する
-                        </Button>
-                    </Container>
-                </Stack>
-            </Box>
+            <BaseLayout>
+                <NewProfHead />
+                <Box width="100%" height="100%">
+                    <Stack direction="column" justifyContent="center" alignItems="center" sx={{ py: 2 }}
+                        component="form" onSubmit={onNewProf}
+                    >
+                        <Container maxWidth="lg">
+                            <Box p={2} bgcolor={t => t.palette.background.paper} width="100%">
+                                <InputBase
+                                    fullWidth
+                                    inputProps={{
+                                        placeholder: "名前を入力してください(必須)",
+                                        style: {
+                                            fontSize: "2rem",
+                                            textAlign: "center",
+                                        },
+                                        ...register("name"),
+                                    }}
+                                />
+                            </Box>
+                        </Container>
+                        <Box width="1px" height="5rem" />
+                        <Container maxWidth="sm">
+                            <Button variant='contained' fullWidth type="submit" disabled={!isValid || isSubmitting}>
+                                プロフを作成する
+                            </Button>
+                        </Container>
+                    </Stack>
+                </Box>
+            </BaseLayout>
         </>
     );
 }

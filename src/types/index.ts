@@ -77,7 +77,7 @@ export const UserSchema = z.object({
     icon: z.string(),
     type: z.enum(["anonymous", "normal"]),
     name: z.string(),
-    lastNotificatonViewed: z.number(),
+    lastNotificationViewed: z.number(),
 })
 export type User = z.infer<typeof UserSchema>
 

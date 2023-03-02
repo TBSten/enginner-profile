@@ -40,11 +40,16 @@ export function useUtilDialog(defaultOpen: boolean = false) {
     const show = () => setOpen(true)
     const hide = () => setOpen(false)
     const toggle = () => setOpen(p => !p)
+    const withHide = (callback: () => void) => () => {
+        hide()
+        callback()
+    }
     return {
         open,
         show,
         hide,
         toggle,
+        withHide,
         dialogProps: {
             open,
             onClose: hide,

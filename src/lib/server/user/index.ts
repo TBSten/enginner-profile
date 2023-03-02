@@ -17,7 +17,7 @@ export const addAnonymousUser = async (): Promise<User> => {
         icon: defaultIcon,
         type: "anonymous",
         name: userId,
-        lastNotificatonViewed: 0,
+        lastNotificationViewed: 0,
     }
     await users.doc(userId).set(user)
     return user

@@ -6,7 +6,7 @@ import Right from '@/components/Right';
 import SeoHead from '@/components/Seo';
 import TextEditButton from '@/components/TextEditButton';
 import ThemeTypePicker from '@/components/ThemeTypePicker';
-import UtilDialog from '@/components/UtilDialog';
+import UtilDialog, { useUtilDialog } from '@/components/UtilDialog';
 import BaseLayout from '@/components/layout/BaseLayout';
 import LayoutContent from '@/components/layout/LayoutContent';
 import { copyToClipboard } from '@/lib/client/copy';
@@ -84,6 +84,11 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
     const handleChangeImages: OverviewProps["onChangeImages"] =
         useCallback(updater => setProf(p => ({ ...p, images: updater(p.images) })), [setProf])
 
+    const router = useRouter()
+    const handleDeleteProf = () => {
+        router.push(`/`)
+    }
+
     useEffect(() => {
         // keyboard handler
         const handleKeydown = (e: KeyboardEvent) => {
@@ -151,6 +156,9 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
                     onChangePublish={handleChangePublich}
                     onSave={handleSaveProf}
                     onSnackbarShow={(text) => setSnackbarContent(text)}
+                />
+                <DangerousSection
+                    onDeleteProf={handleDeleteProf}
                 />
                 <FooterSection />
                 <Fixed
@@ -1252,3 +1260,51 @@ const Fixed: FC<FixedProps> = ({
     );
 }
 
+interface DangerousSectionProps {
+    onDeleteProf: () => void
+}
+const DangerousSection: FC<DangerousSectionProps> = ({
+    onDeleteProf,
+}) => {
+    const deleteConfirmDialog = useUtilDialog()
+    const handleDelete = onDeleteProf
+    return (
+        <>
+            <LayoutContent bgcolor="background.paper">
+                <Box
+                    border="dashed 2px"
+                    borderColor={t => t.palette.error.main}
+                    p={2}
+                    borderRadius={2}
+                    bgcolor={t => t.palette.grey[100]}
+                >
+                    <Grid
+                        container
+                        spacing={2}
+                    >
+                        <Grid item xs={12} md="auto">
+                            <Button variant='contained' color="error" onClick={deleteConfirmDialog.show}>
+                                プロフを削除する
+                            </Button>
+                        </Grid>
+                        <Grid item xs>
+                            このプロフを削除します。この操作は元に戻せません。
+                        </Grid>
+                    </Grid>
+                </Box>
+            </LayoutContent>
+            <UtilDialog {...deleteConfirmDialog.dialogProps}>
+                <DialogTitle color="error">
+                    本当に削除しますか？
+                </DialogTitle>
+                <DialogContent>
+                    この操作は元に戻せません。
+                </DialogContent>
+                <DialogActions>
+                    <Button variant='text' color="inherit" onClick={deleteConfirmDialog.hide}>キャンセル</Button>
+                    <Button variant='contained' color='error' onClick={handleDelete}>削除</Button>
+                </DialogActions>
+            </UtilDialog>
+        </>
+    );
+}

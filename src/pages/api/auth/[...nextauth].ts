@@ -56,7 +56,7 @@ export const authOptions: NextAuthOptions = {
                 name: nextAuthUser.name ?? "",
                 icon: nextAuthUser.image ?? defaultIcon,
                 type: nextAuthUser.type,
-                lastNotificatonViewed: 0,
+                lastNotificationViewed: 0,
             }
             await addUserIfNotExists(user)
             return true

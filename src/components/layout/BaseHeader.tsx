@@ -1,5 +1,4 @@
-import { useSession } from "@/lib/client/auth";
-import { useUser } from "@/lib/client/user";
+import { useSessionUser, useUser } from "@/lib/client/user";
 import { AppBar, Button, CircularProgress, Divider, IconButton, Menu, MenuItem, Toolbar, Typography } from "@mui/material";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
@@ -9,16 +8,16 @@ import { FC, useRef, useState } from "react";
 interface BaseHeaderProps {
 }
 const BaseHeader: FC<BaseHeaderProps> = () => {
-    const { status, session } = useSession()
+    const { user, isLoading } = useSessionUser()
     return (
         <AppBar color="inherit" position="sticky" elevation={1}>
             <Toolbar>
                 <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }}>
                     えんぷろ
                 </Typography>
-                {status === "loading" && <CircularProgress />}
-                {status === "authenticated" && session?.user
-                    ? <UserIcon userId={session!.user.userId} />
+                {isLoading && <CircularProgress />}
+                {user && user.type === "normal"
+                    ? <UserIcon userId={user.userId} />
                     : <Button href="/login">ログイン</Button>
                 }
             </Toolbar>

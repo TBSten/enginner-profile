@@ -12,7 +12,7 @@ const getDefaultProf = (profId: string, authorId: string): Prof => ({
     name: "あなたの名前",
     freeSpace: "",
     slug: profId,
-    icon: "https://storage.googleapis.com/enginner-prof-user-images/defaults/default-1",
+    icon: "https://storage.googleapis.com/enginner-prof-app-images/default-1.png",
     images: [],
     skills: [],
     skillComment: null,
@@ -92,4 +92,11 @@ export const getProfsByUser = async (userId: string) => {
     return snapshot.docs.map(doc =>
         ProfSchema.parse(doc.data())
     )
+}
+
+export const hasViewPermission = async (userId: string, prof: Prof) => {
+    return userId === prof.authorId || prof.publish
+}
+export const hasEditPermission = async (userId: string, prof: Prof) => {
+    return userId === prof.authorId
 }

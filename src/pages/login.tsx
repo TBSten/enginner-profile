@@ -15,8 +15,8 @@ import { authOptions } from './api/auth/[...nextauth]';
 interface Props {
 }
 const LoginPage: NextPage<Props> = () => {
-    const handleSignIn = () => {
-        signIn("google")
+    const handleSignIn = async () => {
+        await signIn("google", { redirect: false })
     }
     return (
         <BaseLayout>

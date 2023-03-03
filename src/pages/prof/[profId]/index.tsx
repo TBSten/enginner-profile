@@ -3,11 +3,10 @@ import Right from '@/components/Right';
 import SeoHead from '@/components/Seo';
 import BaseLayout from '@/components/layout/BaseLayout';
 import LayoutContent from '@/components/layout/LayoutContent';
-import { useSession } from '@/lib/client/auth';
 import { copyToClipboard } from '@/lib/client/copy';
 import { useGlobalDialog } from '@/lib/client/dialog';
-import { useSignInAsAnonymous } from '@/lib/client/useSignInAsAnonymous';
-import { getProf } from '@/lib/server/prof';
+import { useSessionUser } from '@/lib/client/user';
+import { getProf, hasViewPermission } from '@/lib/server/prof';
 import { getGoodCount } from '@/lib/server/prof/good';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { themeTypeToComponent } from '@/prof-theme/components';
@@ -58,7 +57,7 @@ const ProfViewPage: NextPage<Props> = ({ prof, sentGood, goodCount }) => {
         })
         return theme
     }, [prof.theme.color])
-    useSignInAsAnonymous()
+    useSessionUser()
 
     return (
         <>
@@ -123,9 +122,9 @@ const HeaderSection: FC<HeaderSectionProps> = ({ prof, sentGood: defaultSentGood
         await copyToClipboard(profUrl)
         // onSnackbarShow("URLをコピーしました")
     }
-    const { session, status } = useSession()
+    const { user } = useSessionUser()
     const [sentGood, setSentGood] = useState(defaultSentGood)
-    const isAuthor = session?.user?.userId === prof.authorId
+    const isAuthor = user?.userId === prof.authorId
     const handleGood = async () => {
         if (sentGood) {
             setSentGood(false)
@@ -185,9 +184,9 @@ const HeaderSection: FC<HeaderSectionProps> = ({ prof, sentGood: defaultSentGood
                                 </Tooltip>
                             </>
                         }
-                        <Tooltip title={status !== "authenticated" ? "ログインするとGoodできます" : ""}>
+                        <Tooltip title={!user ? "ログインするとGoodできます" : ""}>
                             <Stack direction="column">
-                                <IconButton onClick={handleGood} disabled={status !== "authenticated"}>
+                                <IconButton onClick={handleGood} disabled={!user}>
                                     {sentGood
                                         ? <Favorite color='primary' />
                                         : <FavoriteBorder />
@@ -263,13 +262,22 @@ const FooterSection: FC<FooterSectionProps> = ({ prof }) => {
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     const session = await getServerSession(ctx.req, ctx.res, authOptions)
+    if (!session) {
+        throw new Error("please login or login as anonymous")
+    }
     try {
         // キャッシュを無効化
         ctx.res.setHeader('Cache-Control', 'max-age=5')
 
         const profId = ctx.query.profId as string
         const prof = await getProf(profId)
+        // profが存在しない場合は404
         if (!prof) {
+            return { notFound: true }
+        }
+        // セッションユーザでprofを閲覧する権限がないなら404
+        if (! await hasViewPermission(session?.user.userId, prof)) {
+            console.warn("the user not have permission to view prof", prof, session.user)
             return { notFound: true }
         }
         const sentGood =

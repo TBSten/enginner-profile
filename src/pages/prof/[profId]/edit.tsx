@@ -16,7 +16,8 @@ import { useResponsive } from '@/lib/client/responsive';
 import { useSavable } from '@/lib/client/savable';
 import { LOCAL_PROF_KEY, getLocal, saveLocal } from '@/lib/client/saveLocal';
 import { upload } from '@/lib/client/upload';
-import { getProf } from '@/lib/server/prof';
+import { useSessionUser } from '@/lib/client/user';
+import { getProf, hasEditPermission } from '@/lib/server/prof';
 import { tokenToUserId } from '@/lib/server/user/token';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { Assessment, Prof, ProfItem, ProfItemValue, ProfSchema, Skill, ThemeType } from '@/types';
@@ -89,6 +90,8 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
         router.push(`/`)
     }
 
+    const { user } = useSessionUser()
+
     useEffect(() => {
         // keyboard handler
         const handleKeydown = (e: KeyboardEvent) => {
@@ -156,6 +159,7 @@ const ProfDetailPage: NextPage<Props> = ({ prof: defaultProf }) => {
                     onChangePublish={handleChangePublich}
                     onSave={handleSaveProf}
                     onSnackbarShow={(text) => setSnackbarContent(text)}
+                    isLogined={user?.type === "normal"}
                 />
                 <DangerousSection
                     onDeleteProf={handleDeleteProf}
@@ -188,10 +192,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
         }
         const userId = session?.user.userId
             ?? await tokenToUserId(ctx.req.cookies._enginner_prof_user_token ?? "invalid token")
-        // ログインしたユーザのプロフ
-        const hasEditPermissions = prof.authorId !== userId
-        if (hasEditPermissions) {
-            // 編集する権限がない
+        // 編集権限チェックがない
+        if (!await hasEditPermission(userId, prof)) {
             console.warn("the user not have permission to edit", "prof", prof, "access user", session?.user)
             return {
                 notFound: true,
@@ -411,7 +413,7 @@ const defaultSkill = (): Skill => ({
     comment: "",
     assessment: {
         value: 0,
-        comment: "一つもない",
+        comment: "わからない/知らない",
     },
     appeal: true,
 })
@@ -1132,21 +1134,32 @@ interface OutputSectionProps {
     onChangePublish: (publish: boolean) => void
     onSave: () => Promise<void>
     onSnackbarShow: (text: string) => void
+    isLogined: boolean
 }
 const OutputSection: FC<OutputSectionProps> = React.memo(function OutputSection({
     profId, name,
     publish, onChangePublish, onSave,
     onSnackbarShow,
+    isLogined,
 }) {
     const theme = useTheme();
     const handleClickPublishButton = async () => {
         await onSave();
         onSnackbarShow("保存しました")
     };
+
     const router = useRouter()
+    const confirmGotoProfPageDialog = useUtilDialog()
     const handleGotoProfPage: MouseEventHandler<HTMLAnchorElement> = async (e) => {
         e.preventDefault()
-        const href = e.currentTarget.href
+        if (isLogined) {
+            gotoProfPage()
+        } else {
+            confirmGotoProfPageDialog.show()
+        }
+    }
+    const gotoProfPage = async () => {
+        const href = `/prof/${profId}`
         await onSave()
         router.push(href)
     }
@@ -1170,7 +1183,11 @@ const OutputSection: FC<OutputSectionProps> = React.memo(function OutputSection(
                         href={`/prof/${profId}`}
                         onClick={handleGotoProfPage}
                     >
-                        自己紹介ページを表示
+                        {isLogined
+                            ? "自己紹介ページを表示"
+                            : "自己紹介ページを表示(あとで編集できません)"
+                        }
+
                     </Button>
                     <Button
                         variant='contained'
@@ -1217,6 +1234,25 @@ const OutputSection: FC<OutputSectionProps> = React.memo(function OutputSection(
                     </Tooltip>
                 </Stack>
             </Container>
+            <UtilDialog {...confirmGotoProfPageDialog.dialogProps}>
+                <DialogTitle>
+                    自己紹介ページへ移動しますか？
+                </DialogTitle>
+                <DialogContent>
+                    <Alert severity='error'>
+                        ログインしていないため、後から編集・削除することができません。
+                        本当に自己紹介ページへ移動しますか？
+                    </Alert>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant='text' onClick={confirmGotoProfPageDialog.hide}>
+                        キャンセル
+                    </Button>
+                    <Button variant='contained' onClick={gotoProfPage}>
+                        自己紹介ページへ移動する
+                    </Button>
+                </DialogActions>
+            </UtilDialog>
         </LayoutContent>
     );
 })

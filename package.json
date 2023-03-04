@@ -25,6 +25,7 @@
     "@types/react-dom": "18.0.11",
     "@types/uuid": "^9.0.0",
     "canvas": "^2.11.0",
+    "date-fns": "^2.29.3",
     "eslint": "8.34.0",
     "eslint-config-next": "13.1.6",
     "jotai": "^2.0.2",

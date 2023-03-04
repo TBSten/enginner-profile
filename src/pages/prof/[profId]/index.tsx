@@ -13,7 +13,8 @@ import { themeTypeToComponent } from '@/prof-theme/components';
 import { theme as baseTheme } from "@/styles/theme";
 import { Prof, ProfSchema } from '@/types';
 import { ContentCopy, Edit, Favorite, FavoriteBorder, FiberNew } from '@mui/icons-material';
-import { Box, Button, Chip, IconButton, Stack, ThemeProvider, Tooltip, createTheme } from '@mui/material';
+import { Alert, Box, Button, Chip, IconButton, Stack, ThemeProvider, Tooltip, createTheme } from '@mui/material';
+import { format } from 'date-fns';
 import { GetServerSideProps, NextPage } from 'next';
 import { getServerSession } from 'next-auth';
 import Head from 'next/head';
@@ -146,8 +147,17 @@ const HeaderSection: FC<HeaderSectionProps> = ({ prof, sentGood: defaultSentGood
             }
         }
     }
+    const hasExpire = prof.expireAt !== null
+    const expireText = hasExpire && format(prof.expireAt ?? 0, "yyyy年MM月dd日 H時m分")
     return (
         <>
+            {hasExpire &&
+                <LayoutContent>
+                    <Alert severity='warning'>
+                        このプロフは {expireText} まで有効です。
+                    </Alert>
+                </LayoutContent>
+            }
             <LayoutContent>
                 <Stack
                     p={2}
@@ -200,7 +210,7 @@ const HeaderSection: FC<HeaderSectionProps> = ({ prof, sentGood: defaultSentGood
                     </Stack>
                 </Stack>
             </LayoutContent>
-            {isAuthor &&
+            {isAuthor && !hasExpire &&
                 <LayoutContent>
                     <Stack direction="row" justifyContent="space-between" bgcolor="background.paper" p={2} borderRadius="1rem">
                         <Box>

@@ -62,6 +62,7 @@ export const ProfSchema = z.object({
     createAt: z.number(),
     updateAt: z.number(),
     publishAt: z.number().nullable(),
+    expireAt: z.number().nullable(),
 })
 export type Prof = z.infer<typeof ProfSchema>
 

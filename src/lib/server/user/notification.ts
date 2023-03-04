@@ -12,7 +12,7 @@ export const getAllNotifications = async (userId: string, { viewUser = true }: {
     )
     if (viewUser) {
         await users.doc(userId).set({
-            lastNotificatonViewed: Date.now(),
+            lastNotificationViewed: Date.now(),
         }, { merge: true })
     }
     return results
@@ -21,9 +21,9 @@ export const getNotViewedNotions = async (userId: string) => {
     const user = await getUser(userId)
     if (!user) throw new Error(`invalid userId : ${userId}`)
     if (user.type === "anonymous") throw new Error(`anonymous user (not login user) can not has notifications . please login`)
-    const lastNotificatonViewed = user?.lastNotificatonViewed
+    const lastNotificationViewed = user?.lastNotificationViewed
     const snapshot = await notifications(userId)
-        .where("createAt", ">=", lastNotificatonViewed)
+        .where("createAt", ">=", lastNotificationViewed)
         .orderBy("createAt")
         .get()
     return snapshot.docs.map(doc =>
@@ -34,7 +34,7 @@ export const hasNotifications = async (userId: string) => {
     const user = await getUser(userId)
     if (!user) throw new Error(`invalid userId : ${userId}`)
     const snapshot = await notifications(userId)
-        .where("createAt", ">=", user.lastNotificatonViewed)
+        .where("createAt", ">=", user.lastNotificationViewed)
         .count().get()
     const { count } = snapshot.data()
     return count >= 1

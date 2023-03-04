@@ -1,40 +1,38 @@
-import { UserSchema } from "@/types";
+import { User, UserSchema } from "@/types";
 import { useQuery } from "@tanstack/react-query";
-import { useSession } from "./auth";
+import { signIn, useSession as useNextAuthSession } from "next-auth/react";
+import { useEffect } from "react";
 
-export function useSessionUser() {
-    const { data: session, status } = useSession()
-    const userId = session?.user.userId ?? null
-    const {
-        user,
-        isLoading: isLoadingUser,
-    } = useUser(userId)
-    return {
-        isLoading: status === "loading" || isLoadingUser,
-        user,
-    }
-}
+
 export function useUser(userId: string | null) {
-    const { isLoading, error, data: user } = useQuery({
+    const query = useQuery({
         queryKey: ["user", userId],
-        queryFn: () =>
-            userId
-                ? fetch(`/api/user/${userId}`)
-                    .then(r => r.json())
-                    .then(r => UserSchema.parse(r))
-                : null,
+        queryFn: () => userId ? fetch(`/api/user/${userId}`).then(r => r.json()) : null,
+        select: (data) => data === null ? null : UserSchema.parse(data),
     })
 
-    if (isLoading) {
+    if (query.isLoading) {
         return {
-            isLoading,
-        }
+            isLoading: query.isLoading,
+        } as const
     } else {
         return {
-            isLoading,
-            error,
-            user,
-        }
+            isLoading: query.isLoading,
+            error: query.error,
+            user: query.data as User,
+        } as const
     }
+}
 
+export function useSessionUser() {
+    const naSession = useNextAuthSession()
+    const userId = naSession.data?.user.userId ?? null
+    const session = useUser(userId)
+    useEffect(() => {
+        if (naSession.status === "unauthenticated") {
+            signIn("anonymous", { redirect: false })
+        }
+    }, [naSession.status])
+
+    return session
 }

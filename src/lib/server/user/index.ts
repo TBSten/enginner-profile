@@ -5,7 +5,7 @@ import { db } from "../firestore";
 
 export const users = db.collection("users")
 
-export const defaultIcon = "https://storage.googleapis.com/enginner-prof-user-images/defaults/default-1"
+export const defaultIcon = "https://storage.googleapis.com/enginner-prof-app-images/default-1.png"
 
 export const addUserIfNotExists = async (user: User) => {
     await users.doc(user.userId).set(user, { merge: false })
@@ -17,7 +17,7 @@ export const addAnonymousUser = async (): Promise<User> => {
         icon: defaultIcon,
         type: "anonymous",
         name: userId,
-        lastNotificatonViewed: 0,
+        lastNotificationViewed: 0,
     }
     await users.doc(userId).set(user)
     return user

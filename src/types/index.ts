@@ -62,6 +62,7 @@ export const ProfSchema = z.object({
     createAt: z.number(),
     updateAt: z.number(),
     publishAt: z.number().nullable(),
+    expireAt: z.number().nullable(),
 })
 export type Prof = z.infer<typeof ProfSchema>
 
@@ -77,7 +78,7 @@ export const UserSchema = z.object({
     icon: z.string(),
     type: z.enum(["anonymous", "normal"]),
     name: z.string(),
-    lastNotificatonViewed: z.number(),
+    lastNotificationViewed: z.number(),
 })
 export type User = z.infer<typeof UserSchema>
 

@@ -1,4 +1,4 @@
-import { Box, BoxProps, Container } from "@mui/material";
+import { Box, BoxProps } from "@mui/material";
 import { FC, ReactNode } from "react";
 
 interface LayoutContentProps extends BoxProps {
@@ -8,10 +8,8 @@ interface LayoutContentProps extends BoxProps {
 }
 const LayoutContent: FC<LayoutContentProps> = ({ disablePadding, children, sx, ...boxProps }) => {
     return (
-        <Box component="section" p={{ xs: disablePadding ? 0 : 1, md: disablePadding ? 0 : 2 }} sx={{ overflowX: "auto", ...sx }} {...boxProps}>
-            <Container>
-                {children}
-            </Container>
+        <Box component="section" p={{ xs: disablePadding ? 0 : 1, md: disablePadding ? 0 : 2 }} sx={{ overflowX: "auto", boxSizing: "border-box", ...sx }} {...boxProps}>
+            {children}
         </Box>
     );
 }

@@ -2,33 +2,34 @@ import SeoHead from "@/components/Seo";
 import BaseLayout from "@/components/layout/BaseLayout";
 import { useGlobalDialog } from "@/lib/client/dialog";
 import { LOCAL_PROF_KEY, saveLocal } from "@/lib/client/saveLocal";
-import { getUser } from "@/lib/server/user";
-import { ProfSchema, User } from "@/types";
+import { useSessionUser } from "@/lib/client/user";
+import { ProfSchema } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Button, Container, InputBase, Stack } from '@mui/material';
-import { GetServerSideProps, NextPage } from 'next';
-import { getServerSession } from "next-auth";
+import { Alert, Box, Button, Container, InputBase, Stack } from '@mui/material';
+import { NextPage } from 'next';
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { authOptions } from "../api/auth/[...nextauth]";
 
 const FormSchema = z.object({
-    name: z.string().min(3),
+    name: z.string().min(3, { message: "プロフの名前は3文字以上入力してください" }),
 })
 
 interface Props {
-    user: User | null
 }
-const NewProfPage: NextPage<Props> = ({ user }) => {
-    const { register, handleSubmit, formState: { errors, isValid, isSubmitting } } = useForm<z.infer<typeof FormSchema>>({
+const NewProfPage: NextPage<Props> = ({ }) => {
+    const { user } = useSessionUser()
+    const { register, handleSubmit, formState: { errors, isValid, isSubmitting }, setValue } = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
             name: user?.name ?? "",
         },
     })
+    useEffect(() => {
+        if (user?.name) setValue("name", user.name)
+    }, [setValue, user])
     const router = useRouter()
     const onNewProf = handleSubmit(async (data) => {
         showDialog("プロフを新規作成中...", { canClose: false })
@@ -52,6 +53,11 @@ const NewProfPage: NextPage<Props> = ({ user }) => {
                         component="form" onSubmit={onNewProf}
                     >
                         <Container maxWidth="lg">
+                            {user?.type !== "normal" &&
+                                <Alert severity="warning" sx={{ my: 2 }}>
+                                    ログインしないで作成したプロフはあとで編集・削除できず、1ヶ月の有効期限が付与されます。
+                                </Alert>
+                            }
                             <Box p={2} bgcolor={t => t.palette.background.paper} width="100%">
                                 <InputBase
                                     fullWidth
@@ -63,7 +69,14 @@ const NewProfPage: NextPage<Props> = ({ user }) => {
                                         },
                                         ...register("name"),
                                     }}
+                                    error={!!errors}
                                 />
+                                {errors.name &&
+                                    <Alert severity="error">
+                                        エラー:
+                                        {errors.name.message}
+                                    </Alert>
+                                }
                             </Box>
                         </Container>
                         <Box width="1px" height="5rem" />
@@ -96,12 +109,9 @@ const NewProfHead: FC<NewProfHeadProps> = () => {
         </Head>);
 }
 
-export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
-    const session = await getServerSession(ctx.req, ctx.res, authOptions)
-    const user = session && await getUser(session.user.userId)
-    return {
-        props: {
-            user,
-        }
-    }
-}
+// export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+//     return {
+//         props: {
+//         }
+//     }
+// }
